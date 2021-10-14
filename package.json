@@ -1,0 +1,27 @@
+{
+  "name": "youtube-notifs",
+  "version": "1.0.1",
+  "description": "",
+  "main": "./index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/James-Bennett-295/npm-youtube-notifs.git"
+  },
+  "keywords": [
+    "youtube",
+    "yt",
+    "notifs",
+    "notifications"
+  ],
+  "author": "James Bennett",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/James-Bennett-295/npm-youtube-notifs/issues"
+  },
+  "homepage": "https://James-Bennett-295.github.io/pages/npmYtNotifs/npmYtNotifsIndex.html",
+  "dependencies": {
+    "axios": "^0.21.4",
+    "xml2js": "^0.4.23"
+  }
+}
