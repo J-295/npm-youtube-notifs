@@ -1,67 +1,109 @@
 const fs = require("fs");
 const axios = require("axios");
-const xml2js = require("xml2js");
-const events = require("events");
-const eventEmitter = new events.EventEmitter();
-const dataFile = "./latestVid.json";
-const dataFileFs = "./node_modules/youtube-notifs/latestVid.json";
+const parseXml = require("xml2js").parseString;
+const EventEmitter = require("events");
+const events = new EventEmitter();
 
-function getLatestVidObj() {
-    const latestVid = require(dataFile);
-    return {
-        vidName: latestVid.title[0],
-        vidDescription: latestVid["media:group"][0]["media:description"][0],
-        vidThumbnailUrl: latestVid["media:group"][0]["media:thumbnail"][0].$.url,
-        vidUrl: latestVid.link[0].$.href,
-        channelName: latestVid.author[0].name[0],
-        channelUrl: latestVid.author[0].uri[0]
+var channels = [];
+var data = {};
+
+function log(line, type) {
+    switch (type) {
+        case 0:
+            console.log("[youtube-notifs] INFO: " + line);
+            break;
+        case 1:
+            console.log("[youtube-notifs] WARN: " + line);
+            break;
+        case 2:
+            console.log("[youtube-notifs] ERROR: " + line);
+            break;
     };
 };
 
-function subscribe(channelId, newVidCheckIntervalInSeconds) {
-    eventEmitter.on("dataFileExists", () => {
-        var dataFileParsed;
-        setInterval(() => {
-            fs.readFile(dataFileFs, 'utf8', function (err, data) {
-                dataFileParsed = JSON.parse(data);
+function start(newVidCheckIntervalInSeconds, dataFilePath) {
+    if (!newVidCheckIntervalInSeconds) newVidCheckIntervalInSeconds = 120;
+    if (!dataFilePath) dataFilePath = "./ytNotifsData.json";
+    fs.stat(dataFilePath, (err, stat) => {
+        if (err && err.code === "ENOENT") {
+            fs.writeFile(dataFilePath, "{}", (err) => {
+                if (err) return log(err, 2);
+                fs.readFile(dataFilePath, (err, fileData) => {
+                    if (err) return log(err, 2);
+                    data = JSON.parse(fileData.toString());
+                });
             });
-            axios.get("https://www.youtube.com/feeds/videos.xml?channel_id=" + channelId)
-                .then(function (response) {
-                    xml2js.parseString(response.data, { trim: true }, function (err, parsedResponse) {
-                        if (!dataFileParsed.id || dataFileParsed.id[0] !== parsedResponse.feed.entry[0].id[0]) {
-                            fs.writeFile(dataFileFs, JSON.stringify(parsedResponse.feed.entry[0]), err => {
-                                if (err) return console.log("yt-notifs had an error writing to file \"" + dataFile + "\": " + err);
+        } else {
+            if (err) return log(err, 2);
+            fs.readFile(dataFilePath, (err, fileData) => {
+                if (err) return log(err, 2);
+                data = JSON.parse(fileData.toString());
+            });
+        };
+    });
+    setInterval(() => {
+        channels.forEach(element => {
+            axios.get("https://www.youtube.com/feeds/videos.xml?channel_id=" + element)
+                .then((res) => {
+                    parseXml(res.data, (err, parsed) => {
+                        if (err) return log(err, 2);
+                        if (!parsed.feed.entry || parsed.feed.entry.length < 1) return;
+                        if (parsed.feed.entry[0]["yt:videoId"][0] !== data[element]) {
+                            if (!data[element]) return data[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                            data[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                            fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+                                if (err) return log(err, 2);
                             });
-                            setTimeout(() => eventEmitter.emit("newVid"), 250);
+                            const obj = {
+                                vidName: parsed.feed.entry[0].title[0],
+                                vidUrl: parsed.feed.entry[0].link[0].$.href,
+                                vidDescription: parsed.feed.entry[0]["media:group"][0]["media:description"][0],
+                                vidId: parsed.feed.entry[0]["yt:videoId"][0],
+                                vidWidth: parseInt(parsed.feed.entry[0]["media:group"][0]["media:content"][0].$.width),
+                                vidHeight: parseInt(parsed.feed.entry[0]["media:group"][0]["media:content"][0].$.height),
+                                vidThumbnailUrl: parsed.feed.entry[0]["media:group"][0]["media:thumbnail"][0].$.url,
+                                vidThumbnailWidth: parseInt(parsed.feed.entry[0]["media:group"][0]["media:thumbnail"][0].$.width),
+                                vidThumbnailHeight: parseInt(parsed.feed.entry[0]["media:group"][0]["media:thumbnail"][0].$.height),
+                                channelName: parsed.feed.title[0],
+                                channelUrl: parsed.feed.entry[0].author[0].uri[0],
+                                channelId: parsed.feed["yt:channelId"][0]
+                            };
+                            events.emit("newVid", obj);
                         };
                     });
                 })
-                .catch(function (err) {
-                    console.log("yt-notifs had an error: " + err);
+                .catch((err) => {
+                    log(err, 2);
                 });
-        }, newVidCheckIntervalInSeconds * 1000);
-    });
-    fs.open(dataFileFs, 'r', function (err) {
-        if (err) {
-            fs.writeFile(dataFileFs, "{}", function (err) {
-                if (err) return console.log("yt-notifs had an error creating the file\"" + dataFile + "\": " + err);
-                eventEmitter.emit("dataFileExists");
-            });
-        } else {
-            eventEmitter.emit("dataFileExists");
-        };
-    });
+        });
+    }, newVidCheckIntervalInSeconds * 1000);
 };
 
-function msg(message) {
-    const latestVidObj = getLatestVidObj();
-    return message
-        .replaceAll("{vidName}", latestVidObj.vidName)
-        .replaceAll("{vidDescription}", latestVidObj.vidDescription)
-        .replaceAll("{vidThumbnailUrl}", latestVidObj.vidThumbnailUrl)
-        .replaceAll("{vidUrl}", latestVidObj.vidUrl)
-        .replaceAll("{channelName}", latestVidObj.channelName)
-        .replaceAll("{channelUrl}", latestVidObj.channelUrl);
+function subscribe(channelId) {
+    if (typeof (channelId) === "object") {
+        channelId.forEach(element => {
+            subscribe(element);
+        });
+    } else {
+        if (channels.includes(channelId)) log("The channel " + channelId + " has been subscribed to multiple times!", 1);
+        channels.push(channelId);
+    };
 };
 
-module.exports = { eventEmitter, getLatestVidObj, subscribe, msg };
+function msg(text, obj) {
+    return text
+        .replaceAll("{vidName}", obj.vidName)
+        .replaceAll("{vidUrl}", obj.vidUrl)
+        .replaceAll("{vidDescription}", obj.vidDescription)
+        .replaceAll("{vidId}", obj.vidId)
+        .replaceAll("{vidWidth}", obj.vidWidth)
+        .replaceAll("{vidHeight}", obj.vidHeight)
+        .replaceAll("{vidThumbnailUrl}", obj.vidThumbnailUrl)
+        .replaceAll("{vidThumbnailWidth}", obj.vidThumbnailWidth)
+        .replaceAll("{vidThumbnailHeight}", obj.vidThumbnailHeight)
+        .replaceAll("{channelName}", obj.channelName)
+        .replaceAll("{channelUrl}", obj.channelUrl)
+        .replaceAll("{channelId}", obj.channelId);
+};
+
+module.exports = { start, subscribe, msg, events };

@@ -1,7 +1,7 @@
 {
   "name": "youtube-notifs",
-  "version": "1.0.1",
-  "description": "",
+  "version": "2.0.0",
+  "description": "Get a notification when certain youtube channels upload a new video!",
   "main": "./index.js",
   "scripts": {},
   "repository": {
@@ -10,18 +10,22 @@
   },
   "keywords": [
     "youtube",
+    "notifications",
     "yt",
     "notifs",
-    "notifications"
+    "notification",
+    "notifier",
+    "subscribe",
+    "subscription"
   ],
   "author": "James Bennett",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/James-Bennett-295/npm-youtube-notifs/issues"
   },
-  "homepage": "https://James-Bennett-295.github.io/pages/npmYtNotifs/npmYtNotifsIndex.html",
+  "homepage": "https://github.com/James-Bennett-295/npm-youtube-notifs#readme",
   "dependencies": {
-    "axios": "^0.21.4",
+    "axios": "^0.24.0",
     "xml2js": "^0.4.23"
   }
 }
