@@ -64,5 +64,7 @@ ytNotifs.subscribe(["UCS0N5baNlQWJCUrhCEo8WlA"]); // you don't need to subscribe
 console.log("Current subscriptions: " + ytNotifs.getSubscriptions().join(", ")); // returns an array of channels which are subscribed to
 ytNotifs.unsubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // this functions lets you unsubscribe from an array of channels
 console.log("Name of channel: " + ytNotifs.getChannelName("UC7bD_GEqdgUDCe_cyVa6Y2g")); // get the name of a channel from its ID
+ytNotifs.permanentSubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently subscribe to an array of channels
+ytNotifs.permanentUnsubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently unsubscribe to an array of channels
 ```
 Have any issues, questions or suggestions? Open a Github issue [here](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).

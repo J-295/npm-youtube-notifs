@@ -7,7 +7,8 @@ const events = new EventEmitter();
 var channels = [];
 var data = {
     "latestVids": {},
-    "channelNames": {}
+    "channelNames": {},
+    "permanentSubscriptions": []
 };
 
 function log(line, type) {
@@ -34,6 +35,7 @@ function start(newVidCheckIntervalInSeconds, dataFilePath) {
                 fs.readFile(dataFilePath, (err, fileData) => {
                     if (err) return log(err, 2);
                     data = JSON.parse(fileData.toString());
+                    channels = channels.concat(data.permanentSubscriptions);
                 });
             });
         } else {
@@ -41,6 +43,7 @@ function start(newVidCheckIntervalInSeconds, dataFilePath) {
             fs.readFile(dataFilePath, (err, fileData) => {
                 if (err) return log(err, 2);
                 data = JSON.parse(fileData.toString());
+                channels = channels.concat(data.permanentSubscriptions);
             });
         };
     });
@@ -84,10 +87,7 @@ function start(newVidCheckIntervalInSeconds, dataFilePath) {
 };
 
 function subscribe(channelIds) {
-    channelIds.forEach(element => {
-        if (channels.includes(element)) log("The channel " + element + " has been subscribed to multiple times!", 1);
-        channels.push(element);
-    });
+    channels = channels.concat(channelIds);
 };
 
 function msg(text, obj) {
@@ -120,4 +120,32 @@ function getChannelName(channelId) {
     return data.channelNames[channelId];
 };
 
-module.exports = { start, subscribe, msg, getSubscriptions, unsubscribe, getChannelName, events };
+function permanentSubscribe(channelIds) {
+    subscribe(channelIds);
+    data.permanentSubscriptions.concat(channelIds);
+    fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+        if (err) return log(err, 2);
+    });
+};
+
+function permanentUnsubscribe(channelIds) {
+    unsubscribe(channelIds);
+    channelIds.forEach(element => {
+        data.permanentSubscriptions.splice(data.permanentSubscriptions.indexOf(element), 1);
+    });
+    fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+        if (err) return log(err, 2);
+    });
+};
+
+module.exports = {
+    start,
+    subscribe,
+    msg,
+    getSubscriptions,
+    unsubscribe,
+    getChannelName,
+    permanentSubscribe,
+    permanentUnsubscribe,
+    events
+};
