@@ -8,7 +8,7 @@ ytNotifs.start(60, "./youtubeNotifsData.json"); // args: new video check interva
 ytNotifs.events.on("newVid", (obj) => { // obj is an object containing video info
     console.log(ytNotifs.msg("{channelName} just uploaded a new video!\n{vidUrl}", obj));
     /*
-     * other placeholders that can be used with ytNotifs.msg():
+     * all placeholders that can be used with ytNotifs.msg()
      *   {vidName}
      *   {vidUrl}
      *   {vidDescription}
@@ -23,7 +23,7 @@ ytNotifs.events.on("newVid", (obj) => { // obj is an object containing video inf
      *   {channelId}
      */
 });
-ytNotifs.subscribe("UC7bD_GEqdgUDCe_cyVa6Y2g"); // args: channel id
+ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // args: channel id
 ```
 ```js
 /*
@@ -34,7 +34,7 @@ ytNotifs.start(); // defaults will be used: 120, "./ytNotifsData.json"
 ytNotifs.events.on("newVid", (obj) => {
     console.log(obj.channelName + " just uploaded a new video!\n" + obj.vidUrl);
 });
-ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g", "UCS0N5baNlQWJCUrhCEo8WlA"]); // an array can be used to subscribe to multiple channels at the same time
+ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g", "UCS0N5baNlQWJCUrhCEo8WlA"]); // multiple channels can be subscribed to
 ```
 ```js
 /*
@@ -54,7 +54,15 @@ ytNotifs.events.on("newVid", (obj) => {
     };
     client.channels.get(discordChannelId).send(ytNotifs.msg("{channelName} just uploaded a new video!\n{vidUrl}", obj));
 });
-ytNotifs.subscribe("UC7bD_GEqdgUDCe_cyVa6Y2g");
-ytNotifs.subscribe("UCS0N5baNlQWJCUrhCEo8WlA"); // you don't need to subscribe to all channels at the same time
+ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]);
+ytNotifs.subscribe(["UCS0N5baNlQWJCUrhCEo8WlA"]); // you don't need to subscribe to all channels at the same time
 ```
-Have any issues or questions? Open a Github issue [here](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).
+```js
+/*
+ * Examples of Other functions
+ */
+console.log("Current subscriptions: " + ytNotifs.getSubscriptions().join(", ")); // returns an array of channels which are subscribed to
+ytNotifs.unsubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // this functions lets you unsubscribe from an array of channels
+ytNotifs.getChannelName("UC7bD_GEqdgUDCe_cyVa6Y2g"); // get the name of a channel from its ID
+```
+Have any issues, questions or suggestions? Open a Github issue [here](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).

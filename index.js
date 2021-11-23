@@ -5,7 +5,10 @@ const EventEmitter = require("events");
 const events = new EventEmitter();
 
 var channels = [];
-var data = {};
+var data = {
+    "latestVids": {},
+    "channelNames": {}
+};
 
 function log(line, type) {
     switch (type) {
@@ -26,7 +29,7 @@ function start(newVidCheckIntervalInSeconds, dataFilePath) {
     if (!dataFilePath) dataFilePath = "./ytNotifsData.json";
     fs.stat(dataFilePath, (err, stat) => {
         if (err && err.code === "ENOENT") {
-            fs.writeFile(dataFilePath, "{}", (err) => {
+            fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
                 if (err) return log(err, 2);
                 fs.readFile(dataFilePath, (err, fileData) => {
                     if (err) return log(err, 2);
@@ -48,9 +51,10 @@ function start(newVidCheckIntervalInSeconds, dataFilePath) {
                     parseXml(res.data, (err, parsed) => {
                         if (err) return log(err, 2);
                         if (!parsed.feed.entry || parsed.feed.entry.length < 1) return;
-                        if (parsed.feed.entry[0]["yt:videoId"][0] !== data[element]) {
-                            if (!data[element]) return data[element] = parsed.feed.entry[0]["yt:videoId"][0];
-                            data[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                        if (parsed.feed.entry[0]["yt:videoId"][0] !== data.latestVids[element]) {
+                            if (!data.latestVids[element]) return data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                            data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                            data.channelNames[element] = parsed.feed.title[0];
                             fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
                                 if (err) return log(err, 2);
                             });
@@ -79,15 +83,11 @@ function start(newVidCheckIntervalInSeconds, dataFilePath) {
     }, newVidCheckIntervalInSeconds * 1000);
 };
 
-function subscribe(channelId) {
-    if (typeof (channelId) === "object") {
-        channelId.forEach(element => {
-            subscribe(element);
-        });
-    } else {
-        if (channels.includes(channelId)) log("The channel " + channelId + " has been subscribed to multiple times!", 1);
-        channels.push(channelId);
-    };
+function subscribe(channelIds) {
+    channelIds.forEach(element => {
+        if (channels.includes(element)) log("The channel " + element + " has been subscribed to multiple times!", 1);
+        channels.push(element);
+    });
 };
 
 function msg(text, obj) {
@@ -106,4 +106,18 @@ function msg(text, obj) {
         .replaceAll("{channelId}", obj.channelId);
 };
 
-module.exports = { start, subscribe, msg, events };
+function getSubscriptions() {
+    return channels;
+};
+
+function unsubscribe(channelIds) {
+    channelIds.forEach(element => {
+        channels.splice(channels.indexOf(element), 1);
+    });
+};
+
+function getChannelName(channelId) {
+    return data.channelNames[channelId];
+};
+
+module.exports = { start, subscribe, msg, getSubscriptions, unsubscribe, getChannelName, events };
