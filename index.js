@@ -4,6 +4,7 @@ const parseXml = require("xml2js").parseString;
 const EventEmitter = require("events");
 const events = new EventEmitter();
 
+var dataFilePath;
 var channels = [];
 var data = {
     "latestVids": {},
@@ -25,9 +26,13 @@ function log(line, type) {
     };
 };
 
-function start(newVidCheckIntervalInSeconds, dataFilePath) {
+function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
     if (!newVidCheckIntervalInSeconds) newVidCheckIntervalInSeconds = 120;
-    if (!dataFilePath) dataFilePath = "./ytNotifsData.json";
+    if (!inputDataFilePath) {
+        dataFilePath = "./ytNotifsData.json";
+    } else {
+        dataFilePath = inputDataFilePath;
+    };
     fs.stat(dataFilePath, (err, stat) => {
         if (err && err.code === "ENOENT") {
             fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
@@ -138,6 +143,17 @@ function permanentUnsubscribe(channelIds) {
     });
 };
 
+function delChannelsData(channelIds) {
+    permanentUnsubscribe(channelIds);
+    channelIds.forEach(element => {
+        delete data.latestVids[element];
+        delete data.channelNames[element];
+    });
+    fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+        if (err) return log(err, 2);
+    });
+};
+
 module.exports = {
     start,
     subscribe,
@@ -147,5 +163,6 @@ module.exports = {
     getChannelName,
     permanentSubscribe,
     permanentUnsubscribe,
+    delChannelsData,
     events
 };
