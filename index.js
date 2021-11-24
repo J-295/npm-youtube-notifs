@@ -59,29 +59,30 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
                     parseXml(res.data, (err, parsed) => {
                         if (err) return log(err, 2);
                         if (!parsed.feed.entry || parsed.feed.entry.length < 1) return;
-                        if (parsed.feed.entry[0]["yt:videoId"][0] !== data.latestVids[element]) {
-                            if (!data.latestVids[element]) return data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
-                            data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
-                            data.channelNames[element] = parsed.feed.title[0];
-                            fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-                                if (err) return log(err, 2);
-                            });
+                        if (!data.latestVids[element]) return data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                        for (i in parsed.feed.entry) {
+                            if (parsed.feed.entry[i]["yt:videoId"][0] === data.latestVids[element]) break;
                             const obj = {
-                                vidName: parsed.feed.entry[0].title[0],
-                                vidUrl: parsed.feed.entry[0].link[0].$.href,
-                                vidDescription: parsed.feed.entry[0]["media:group"][0]["media:description"][0],
-                                vidId: parsed.feed.entry[0]["yt:videoId"][0],
-                                vidWidth: parseInt(parsed.feed.entry[0]["media:group"][0]["media:content"][0].$.width),
-                                vidHeight: parseInt(parsed.feed.entry[0]["media:group"][0]["media:content"][0].$.height),
-                                vidThumbnailUrl: parsed.feed.entry[0]["media:group"][0]["media:thumbnail"][0].$.url,
-                                vidThumbnailWidth: parseInt(parsed.feed.entry[0]["media:group"][0]["media:thumbnail"][0].$.width),
-                                vidThumbnailHeight: parseInt(parsed.feed.entry[0]["media:group"][0]["media:thumbnail"][0].$.height),
+                                vidName: parsed.feed.entry[i].title[0],
+                                vidUrl: parsed.feed.entry[i].link[0].$.href,
+                                vidDescription: parsed.feed.entry[i]["media:group"][0]["media:description"][0],
+                                vidId: parsed.feed.entry[i]["yt:videoId"][0],
+                                vidWidth: parseInt(parsed.feed.entry[i]["media:group"][0]["media:content"][0].$.width),
+                                vidHeight: parseInt(parsed.feed.entry[i]["media:group"][0]["media:content"][0].$.height),
+                                vidThumbnailUrl: parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.url,
+                                vidThumbnailWidth: parseInt(parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.width),
+                                vidThumbnailHeight: parseInt(parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.height),
                                 channelName: parsed.feed.title[0],
-                                channelUrl: parsed.feed.entry[0].author[0].uri[0],
+                                channelUrl: parsed.feed.entry[i].author[0].uri[0],
                                 channelId: parsed.feed["yt:channelId"][0]
                             };
                             events.emit("newVid", obj);
                         };
+                        data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+                        data.channelNames[element] = parsed.feed.title[0];
+                        fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+                            if (err) return log(err, 2);
+                        });
                     });
                 })
                 .catch((err) => {
