@@ -5,6 +5,7 @@ const EventEmitter = require("events");
 const events = new EventEmitter();
 
 var dataFilePath;
+var preventDuplicateSubscriptions;
 var channels = [];
 var data = {
 	"latestVids": {},
@@ -26,12 +27,17 @@ function log(line, type) {
 	};
 };
 
-function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
+function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions) {
 	if (!newVidCheckIntervalInSeconds) newVidCheckIntervalInSeconds = 120;
 	if (!inputDataFilePath) {
 		dataFilePath = "./ytNotifsData.json";
 	} else {
 		dataFilePath = inputDataFilePath;
+	};
+	if (!inputPreventDuplicateSubscriptions) {
+		preventDuplicateSubscriptions = true;
+	} else {
+		preventDuplicateSubscriptions = inputPreventDuplicateSubscriptions;
 	};
 	fs.stat(dataFilePath, (err, stat) => {
 		if (err && err.code === "ENOENT") {
@@ -93,7 +99,13 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
 };
 
 function subscribe(channelIds) {
-	channels = channels.concat(channelIds);
+	for (i in channelIds) {
+		if (channels.includes(channelIds[i])) {
+			log("Channel " + channelIds[i] + " was not subscribed to because it already is subscribed to!", 1);
+			continue;
+		};
+		channels.push(channelIds[i]);
+	};
 };
 
 function msg(text, obj) {
@@ -129,7 +141,13 @@ function getChannelName(channelId) {
 function permanentSubscribe(channelIds) {
 	setTimeout(() => {
 		subscribe(channelIds);
-		data.permanentSubscriptions = data.permanentSubscriptions.concat(channelIds);
+		for (i in channelIds) {
+			if (data.permanentSubscriptions.includes(channelIds[i])) {
+				log("Channel " + channelIds[i] + " was not permanently subscribed to because it already is permanently subscribed to!", 1);
+				continue;
+			};
+			data.permanentSubscriptions.push(channelIds[i]);
+		};
 		fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
 			if (err) return log(err, 2);
 		});
