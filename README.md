@@ -4,7 +4,7 @@ Get a notification when certain youtube channels upload a new video!
  * Example One
  */
 const ytNotifs = require("youtube-notifs");
-ytNotifs.start(60, "./youtubeNotifsData.json", false); // args: new video check interval in seconds, data file path, prevent duplicate subscriptions
+ytNotifs.start(60, "./youtubeNotifsData.json", false, 120); // args: new video check interval in seconds, data file path, prevent duplicate subscriptions, data file auto save interval in seconds
 ytNotifs.events.on("newVid", (obj) => { // obj is an object containing video info
     console.log(ytNotifs.msg("{channelName} just uploaded a new video!\n{vidUrl}", obj));
     /*
@@ -30,7 +30,7 @@ ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // args: channel id
  * Example Two
  */
 const ytNotifs = require("youtube-notifs");
-ytNotifs.start(); // defaults will be used: 120, "./ytNotifsData.json", true
+ytNotifs.start(); // defaults will be used: 120, "./ytNotifsData.json", true, 60
 ytNotifs.events.on("newVid", (obj) => {
     console.log(obj.channelName + " just uploaded a new video!\n" + obj.vidUrl);
 });
@@ -67,5 +67,6 @@ console.log("Name of channel: " + ytNotifs.getChannelName("UC7bD_GEqdgUDCe_cyVa6
 ytNotifs.permanentSubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently subscribe to an array of channels
 ytNotifs.permanentUnsubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently unsubscribe from an array of channels
 ytNotifs.delChannelsData(["UCBa659QWEk1AI4Tg--mrJ2A"]); // permanently unsubscribe from an array of channels and delete all data about those channels
+ytNotifs.saveDataFile(); // saves the data file
 ```
 Have any issues, questions or suggestions? Open a Github issue [here](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).

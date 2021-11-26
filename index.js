@@ -4,6 +4,7 @@ const parseXml = require("xml2js").parseString;
 const EventEmitter = require("events");
 const events = new EventEmitter();
 
+var saveFile = false;
 var dataFilePath;
 var preventDuplicateSubscriptions;
 var channels = [];
@@ -27,7 +28,7 @@ function log(line, type) {
 	};
 };
 
-function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions) {
+function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions, dataFileAutoSaveIntervalInSeconds) {
 	if (!newVidCheckIntervalInSeconds) newVidCheckIntervalInSeconds = 120;
 	if (!inputDataFilePath) {
 		dataFilePath = "./ytNotifsData.json";
@@ -38,6 +39,17 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 		preventDuplicateSubscriptions = true;
 	} else {
 		preventDuplicateSubscriptions = inputPreventDuplicateSubscriptions;
+	};
+	if (!dataFileAutoSaveIntervalInSeconds) dataFileAutoSaveIntervalInSeconds = 60;
+	if (dataFileAutoSaveIntervalInSeconds !== 0) {
+		setInterval(() => {
+			if (saveFile) {
+				saveFile = false;
+				fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+					if (err) return log(err, 2);
+				});
+			};
+		}, dataFileAutoSaveIntervalInSeconds * 1000);
 	};
 	fs.stat(dataFilePath, (err, stat) => {
 		if (err && err.code === "ENOENT") {
@@ -86,9 +98,6 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 						};
 						data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 						data.channelNames[element] = parsed.feed.title[0];
-						fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-							if (err) return log(err, 2);
-						});
 					});
 				})
 				.catch((err) => {
@@ -96,6 +105,14 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 				});
 		});
 	}, newVidCheckIntervalInSeconds * 1000);
+};
+
+function saveDataFile() {
+	setTimeout(() => {
+		fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+			if (err) return log(err, 2);
+		});
+	}, 100);
 };
 
 function subscribe(channelIds) {
@@ -139,44 +156,32 @@ function getChannelName(channelId) {
 };
 
 function permanentSubscribe(channelIds) {
-	setTimeout(() => {
-		subscribe(channelIds);
-		for (i in channelIds) {
-			if (data.permanentSubscriptions.includes(channelIds[i])) {
-				log("Channel " + channelIds[i] + " was not permanently subscribed to because it already is permanently subscribed to!", 1);
-				continue;
-			};
-			data.permanentSubscriptions.push(channelIds[i]);
+	subscribe(channelIds);
+	for (i in channelIds) {
+		if (data.permanentSubscriptions.includes(channelIds[i])) {
+			log("Channel " + channelIds[i] + " was not permanently subscribed to because it already is permanently subscribed to!", 1);
+			continue;
 		};
-		fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-			if (err) return log(err, 2);
-		});
-	}, 100);
+		data.permanentSubscriptions.push(channelIds[i]);
+	};
+	saveFile = true;
 };
 
 function permanentUnsubscribe(channelIds) {
-	setTimeout(() => {
-		unsubscribe(channelIds);
-		channelIds.forEach(element => {
-			data.permanentSubscriptions.splice(data.permanentSubscriptions.indexOf(element), 1);
-		});
-		fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-			if (err) return log(err, 2);
-		});
-	}, 100);
+	unsubscribe(channelIds);
+	channelIds.forEach(element => {
+		data.permanentSubscriptions.splice(data.permanentSubscriptions.indexOf(element), 1);
+	});
+	saveFile = true;
 };
 
 function delChannelsData(channelIds) {
-	setTimeout(() => {
-		permanentUnsubscribe(channelIds);
-		channelIds.forEach(element => {
-			delete data.latestVids[element];
-			delete data.channelNames[element];
-		});
-		fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-			if (err) return log(err, 2);
-		});
-	}, 100);
+	permanentUnsubscribe(channelIds);
+	channelIds.forEach(element => {
+		delete data.latestVids[element];
+		delete data.channelNames[element];
+	});
+	saveFile = true;
 };
 
 module.exports = {
@@ -189,5 +194,6 @@ module.exports = {
 	permanentSubscribe,
 	permanentUnsubscribe,
 	delChannelsData,
+	saveDataFile,
 	events
 };
