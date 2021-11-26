@@ -108,11 +108,9 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 };
 
 function saveDataFile() {
-	setTimeout(() => {
-		fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-			if (err) return log(err, 2);
-		});
-	}, 100);
+	fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+		if (err) return log(err, 2);
+	});
 };
 
 function subscribe(channelIds) {
@@ -156,23 +154,27 @@ function getChannelName(channelId) {
 };
 
 function permanentSubscribe(channelIds) {
-	subscribe(channelIds);
-	for (i in channelIds) {
-		if (data.permanentSubscriptions.includes(channelIds[i])) {
-			log("Channel " + channelIds[i] + " was not permanently subscribed to because it already is permanently subscribed to!", 1);
-			continue;
+	setTimeout(() => {
+		subscribe(channelIds);
+		for (i in channelIds) {
+			if (data.permanentSubscriptions.includes(channelIds[i])) {
+				log("Channel " + channelIds[i] + " was not permanently subscribed to because it already is permanently subscribed to!", 1);
+				continue;
+			};
+			data.permanentSubscriptions.push(channelIds[i]);
 		};
-		data.permanentSubscriptions.push(channelIds[i]);
-	};
-	saveFile = true;
+		saveFile = true;
+	}, 100);
 };
 
 function permanentUnsubscribe(channelIds) {
-	unsubscribe(channelIds);
-	channelIds.forEach(element => {
-		data.permanentSubscriptions.splice(data.permanentSubscriptions.indexOf(element), 1);
-	});
-	saveFile = true;
+	setTimeout(() => {
+		unsubscribe(channelIds);
+		channelIds.forEach(element => {
+			data.permanentSubscriptions.splice(data.permanentSubscriptions.indexOf(element), 1);
+		});
+		saveFile = true;
+	}, 100);
 };
 
 function delChannelsData(channelIds) {
