@@ -5,6 +5,7 @@ const EventEmitter = require("events");
 const events = new EventEmitter();
 const path = require("path");
 
+var debugModeEnabled = false;
 var saveFile = false;
 var dataFilePath;
 var preventDuplicateSubscriptions;
@@ -26,44 +27,59 @@ function log(line, type) {
 		case 2:
 			console.log("[youtube-notifs] ERROR: " + line);
 			break;
+		case 3:
+			if (debugModeEnabled) { 
+				console.log("[youtube-notifs] DEBUG: " + line);
+			};
+			break;
 	};
 };
 
-function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions, dataFileAutoSaveIntervalInSeconds) {
-	if (!newVidCheckIntervalInSeconds) newVidCheckIntervalInSeconds = 120;
-	if (!inputDataFilePath) {
+function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions, dataFileAutoSaveIntervalInSeconds, inputDebugModeEnabled) {
+	log("start function ran", 3);
+	if (typeof(newVidCheckIntervalInSeconds) === "undefined") newVidCheckIntervalInSeconds = 120;
+	if (typeof(inputDataFilePath) === "undefined") {
 		dataFilePath = "./ytNotifsData.json";
 	} else {
 		dataFilePath = inputDataFilePath;
 	};
-	if (!inputPreventDuplicateSubscriptions) {
+	if (typeof(inputPreventDuplicateSubscriptions) === "undefined") {
 		preventDuplicateSubscriptions = true;
 	} else {
 		preventDuplicateSubscriptions = inputPreventDuplicateSubscriptions;
 	};
-	if (!dataFileAutoSaveIntervalInSeconds) dataFileAutoSaveIntervalInSeconds = 60;
+	if (typeof(dataFileAutoSaveIntervalInSeconds) === "undefined") dataFileAutoSaveIntervalInSeconds = 60;
+	if (inputDebugModeEnabled) debugModeEnabled = true;
 	if (dataFileAutoSaveIntervalInSeconds !== 0) {
 		setInterval(() => {
 			if (saveFile) {
 				saveFile = false;
+				log("Attempting to save data file (reason: auto save interval)...", 3);
 				fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
 					if (err) return log(err, 2);
+					log("Data file saved", 3);
 				});
+			} else {
+				log("Data file not saved this time in auto save interval as saveFile bool is false", 3);
 			};
 		}, dataFileAutoSaveIntervalInSeconds * 1000);
 	};
 	fs.stat(dataFilePath, (err, stat) => {
 		if (err && err.code === "ENOENT") {
+			log("Data file does not exist, attempting to create...", 3);
 			fs.promises.mkdir(path.dirname(dataFilePath), { recursive: true })
 				.then(() => {
 					fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
 						if (err) return log(err, 2);
+						log("Data file created", 3);
 					});
 				});
 		} else {
 			if (err) return log(err, 2);
+			log("Data file already exists, attempting to read file...", 3);
 			fs.readFile(dataFilePath, (err, fileData) => {
 				if (err) return log(err, 2);
+				log("Data file has been read", 3);
 				data = JSON.parse(fileData.toString());
 				channels = channels.concat(data.permanentSubscriptions);
 			});
@@ -71,6 +87,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 	});
 	setInterval(() => {
 		channels.forEach(element => {
+			log("Doing new vid check for channel " + element + "...", 3);
 			axios.get("https://www.youtube.com/feeds/videos.xml?channel_id=" + element)
 				.then((res) => {
 					parseXml(res.data, (err, parsed) => {
@@ -97,6 +114,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 						};
 						data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 						data.channelNames[element] = parsed.feed.title[0];
+						log("New vid check for channel " + element + " complete", 3);
 					});
 				})
 				.catch((err) => {
@@ -107,12 +125,15 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 };
 
 function saveDataFile() {
+	log("Attempting to save data file (reason: saveDataFile function ran)...", 3);
 	fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
 		if (err) return log(err, 2);
+		log("Data file saved", 3);
 	});
 };
 
 function subscribe(channelIds) {
+	log("subscribe function ran", 3);
 	for (i in channelIds) {
 		if (channels.includes(channelIds[i])) {
 			log("Channel " + channelIds[i] + " was not subscribed to because it already is subscribed to!", 1);
@@ -123,6 +144,7 @@ function subscribe(channelIds) {
 };
 
 function msg(text, obj) {
+	log("msg function ran", 3);
 	return text
 		.replaceAll("{vidName}", obj.vidName)
 		.replaceAll("{vidUrl}", obj.vidUrl)
@@ -139,20 +161,24 @@ function msg(text, obj) {
 };
 
 function getSubscriptions() {
+	log("getSubscriptions function ran", 3);
 	return channels;
 };
 
 function unsubscribe(channelIds) {
+	log("unsubscribe function ran", 3);
 	channelIds.forEach(element => {
 		channels.splice(channels.indexOf(element), 1);
 	});
 };
 
 function getChannelName(channelId) {
+	log("getChannelName function ran", 3);
 	return data.channelNames[channelId];
 };
 
 function permanentSubscribe(channelIds) {
+	log("permanentSubscribe function ran", 3);
 	setTimeout(() => {
 		subscribe(channelIds);
 		for (i in channelIds) {
@@ -167,6 +193,7 @@ function permanentSubscribe(channelIds) {
 };
 
 function permanentUnsubscribe(channelIds) {
+	log("permanentUnsubscribe function ran", 3);
 	setTimeout(() => {
 		unsubscribe(channelIds);
 		channelIds.forEach(element => {
@@ -177,6 +204,7 @@ function permanentUnsubscribe(channelIds) {
 };
 
 function delChannelsData(channelIds) {
+	log("delChannelsData function ran", 3);
 	permanentUnsubscribe(channelIds);
 	channelIds.forEach(element => {
 		delete data.latestVids[element];
