@@ -4,7 +4,7 @@ Get a notification when certain youtube channels upload a new video!
  * Example One
  */
 const ytNotifs = require("youtube-notifs");
-ytNotifs.start(60, "./youtubeNotifsData.json", false, 120); // args: new video check interval in seconds, data file path, prevent duplicate subscriptions, data file auto save interval in seconds, debug mode enabled
+ytNotifs.start(60, "./youtubeNotifsData.json", false, 120, false); // args: new video check interval in seconds, data file path, prevent duplicate subscriptions, data file auto save interval in seconds, debug mode enabled
 ytNotifs.events.on("newVid", (obj) => { // obj is an object containing video info
     console.log(ytNotifs.msg("{channelName} just uploaded a new video!\n{vidUrl}", obj));
     /*
