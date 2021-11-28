@@ -3,6 +3,7 @@ const axios = require("axios");
 const parseXml = require("xml2js").parseString;
 const EventEmitter = require("events");
 const events = new EventEmitter();
+const path = require("path");
 
 var saveFile = false;
 var dataFilePath;
@@ -53,14 +54,12 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 	};
 	fs.stat(dataFilePath, (err, stat) => {
 		if (err && err.code === "ENOENT") {
-			fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-				if (err) return log(err, 2);
-				fs.readFile(dataFilePath, (err, fileData) => {
-					if (err) return log(err, 2);
-					data = JSON.parse(fileData.toString());
-					channels = channels.concat(data.permanentSubscriptions);
+			fs.promises.mkdir(path.dirname(dataFilePath), { recursive: true })
+				.then(() => {
+					fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+						if (err) return log(err, 2);
+					});
 				});
-			});
 		} else {
 			if (err) return log(err, 2);
 			fs.readFile(dataFilePath, (err, fileData) => {
