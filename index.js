@@ -28,7 +28,7 @@ function log(line, type) {
 			console.log("[youtube-notifs] ERROR: " + line);
 			break;
 		case 3:
-			if (debugModeEnabled) { 
+			if (debugModeEnabled) {
 				console.log("[youtube-notifs] DEBUG: " + line);
 			};
 			break;
@@ -37,18 +37,18 @@ function log(line, type) {
 
 function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions, dataFileAutoSaveIntervalInSeconds, inputDebugModeEnabled) {
 	log("start function ran", 3);
-	if (typeof(newVidCheckIntervalInSeconds) === "undefined") newVidCheckIntervalInSeconds = 120;
-	if (typeof(inputDataFilePath) === "undefined") {
+	if (typeof (newVidCheckIntervalInSeconds) === "undefined") newVidCheckIntervalInSeconds = 120;
+	if (typeof (inputDataFilePath) === "undefined") {
 		dataFilePath = "./ytNotifsData.json";
 	} else {
 		dataFilePath = inputDataFilePath;
 	};
-	if (typeof(inputPreventDuplicateSubscriptions) === "undefined") {
+	if (typeof (inputPreventDuplicateSubscriptions) === "undefined") {
 		preventDuplicateSubscriptions = true;
 	} else {
 		preventDuplicateSubscriptions = inputPreventDuplicateSubscriptions;
 	};
-	if (typeof(dataFileAutoSaveIntervalInSeconds) === "undefined") dataFileAutoSaveIntervalInSeconds = 60;
+	if (typeof (dataFileAutoSaveIntervalInSeconds) === "undefined") dataFileAutoSaveIntervalInSeconds = 60;
 	if (inputDebugModeEnabled) debugModeEnabled = true;
 	if (dataFileAutoSaveIntervalInSeconds !== 0) {
 		setInterval(() => {
@@ -97,18 +97,24 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 						for (i in parsed.feed.entry) {
 							if (parsed.feed.entry[i]["yt:videoId"][0] === data.latestVids[element]) break;
 							const obj = {
-								vidName: parsed.feed.entry[i].title[0],
-								vidUrl: parsed.feed.entry[i].link[0].$.href,
-								vidDescription: parsed.feed.entry[i]["media:group"][0]["media:description"][0],
-								vidId: parsed.feed.entry[i]["yt:videoId"][0],
-								vidWidth: parseInt(parsed.feed.entry[i]["media:group"][0]["media:content"][0].$.width),
-								vidHeight: parseInt(parsed.feed.entry[i]["media:group"][0]["media:content"][0].$.height),
-								vidThumbnailUrl: parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.url,
-								vidThumbnailWidth: parseInt(parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.width),
-								vidThumbnailHeight: parseInt(parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.height),
-								channelName: parsed.feed.title[0],
-								channelUrl: parsed.feed.entry[i].author[0].uri[0],
-								channelId: parsed.feed["yt:channelId"][0]
+								vid: {
+									name: parsed.feed.entry[i].title[0],
+									url: parsed.feed.entry[i].link[0].$.href,
+									description: parsed.feed.entry[i]["media:group"][0]["media:description"][0],
+									id: parsed.feed.entry[i]["yt:videoId"][0],
+									width: parseInt(parsed.feed.entry[i]["media:group"][0]["media:content"][0].$.width),
+									height: parseInt(parsed.feed.entry[i]["media:group"][0]["media:content"][0].$.height),
+									thumbnail: {
+										url: parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.url,
+										width: parseInt(parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.width),
+										height: parseInt(parsed.feed.entry[i]["media:group"][0]["media:thumbnail"][0].$.height)
+									}
+								},
+								channel: {
+									name: parsed.feed.title[0],
+									url: parsed.feed.entry[i].author[0].uri[0],
+									id: parsed.feed["yt:channelId"][0]
+								}
 							};
 							events.emit("newVid", obj);
 						};
@@ -146,18 +152,18 @@ function subscribe(channelIds) {
 function msg(text, obj) {
 	log("msg function ran", 3);
 	return text
-		.replaceAll("{vidName}", obj.vidName)
-		.replaceAll("{vidUrl}", obj.vidUrl)
-		.replaceAll("{vidDescription}", obj.vidDescription)
-		.replaceAll("{vidId}", obj.vidId)
-		.replaceAll("{vidWidth}", obj.vidWidth)
-		.replaceAll("{vidHeight}", obj.vidHeight)
-		.replaceAll("{vidThumbnailUrl}", obj.vidThumbnailUrl)
-		.replaceAll("{vidThumbnailWidth}", obj.vidThumbnailWidth)
-		.replaceAll("{vidThumbnailHeight}", obj.vidThumbnailHeight)
-		.replaceAll("{channelName}", obj.channelName)
-		.replaceAll("{channelUrl}", obj.channelUrl)
-		.replaceAll("{channelId}", obj.channelId);
+		.replaceAll("{vidName}", obj.vid.name)
+		.replaceAll("{vidUrl}", obj.vid.url)
+		.replaceAll("{vidDescription}", obj.vid.description)
+		.replaceAll("{vidId}", obj.vid.id)
+		.replaceAll("{vidWidth}", obj.vid.width)
+		.replaceAll("{vidHeight}", obj.vid.height)
+		.replaceAll("{vidThumbnailUrl}", obj.vid.thumbnail.url)
+		.replaceAll("{vidThumbnailWidth}", obj.vid.thumbnail.width)
+		.replaceAll("{vidThumbnailHeight}", obj.vid.thumbnail.height)
+		.replaceAll("{channelName}", obj.channel.name)
+		.replaceAll("{channelUrl}", obj.channel.url)
+		.replaceAll("{channelId}", obj.channel.id);
 };
 
 function getSubscriptions() {

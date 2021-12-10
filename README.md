@@ -32,7 +32,7 @@ ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // args: channel id
 const ytNotifs = require("youtube-notifs");
 ytNotifs.start(); // defaults will be used: 120, "./ytNotifsData.json", true, 60, false
 ytNotifs.events.on("newVid", (obj) => {
-    console.log(obj.channelName + " just uploaded a new video!\n" + obj.vidUrl);
+    console.log(obj.channel.name + " just uploaded a new video!\n" + obj.vid.url);
 });
 ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g", "UCS0N5baNlQWJCUrhCEo8WlA"]); // multiple channels can be subscribed to
 ```
@@ -44,7 +44,7 @@ const ytNotifs = require("youtube-notifs");
 ytNotifs.start();
 ytNotifs.events.on("newVid", (obj) => {
     var discordChannelId;
-    switch (obj.vidId) {
+    switch (obj.vid.id) {
         case "UC7bD_GEqdgUDCe_cyVa6Y2g":
             discordChannelId = "521539885237272586";
             break;
