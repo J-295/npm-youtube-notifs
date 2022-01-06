@@ -93,7 +93,11 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 					parseXml(res.data, (err, parsed) => {
 						if (err) return log(err, 2);
 						if (!parsed.feed.entry || parsed.feed.entry.length < 1) return;
-						if (!data.latestVids[element]) return data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+						if (!data.latestVids[element]) {
+							data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+							saveFile = true;
+							return;
+						};
 						for (i in parsed.feed.entry) {
 							if (parsed.feed.entry[i]["yt:videoId"][0] === data.latestVids[element]) break;
 							const obj = {
