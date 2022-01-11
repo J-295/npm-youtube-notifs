@@ -36,7 +36,6 @@ function log(line, type) {
 };
 
 function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions, dataFileAutoSaveIntervalInSeconds, inputDebugModeEnabled) {
-	log("start function ran", 3);
 	if (typeof (newVidCheckIntervalInSeconds) === "undefined") newVidCheckIntervalInSeconds = 120;
 	if (typeof (inputDataFilePath) === "undefined") {
 		dataFilePath = "./ytNotifsData.json";
@@ -50,6 +49,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 	};
 	if (typeof (dataFileAutoSaveIntervalInSeconds) === "undefined") dataFileAutoSaveIntervalInSeconds = 60;
 	if (inputDebugModeEnabled) debugModeEnabled = true;
+	log("start function ran. Args:\t" + newVidCheckIntervalInSeconds + "\t" + inputDataFilePath + "\t" + inputPreventDuplicateSubscriptions + "\t" + dataFileAutoSaveIntervalInSeconds + "\t" + inputDebugModeEnabled, 3);
 	if (dataFileAutoSaveIntervalInSeconds !== 0) {
 		setInterval(() => {
 			if (saveFile) {
@@ -79,7 +79,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 			log("Data file already exists, attempting to read file...", 3);
 			fs.readFile(dataFilePath, (err, fileData) => {
 				if (err) return log(err, 2);
-				log("Data file has been read", 3);
+				log("Data file has been read. Data:\t" + fileData, 3);
 				data = JSON.parse(fileData.toString());
 				channels = channels.concat(data.permanentSubscriptions);
 			});
@@ -92,8 +92,9 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 				.then((res) => {
 					parseXml(res.data, (err, parsed) => {
 						if (err) return log(err, 2);
-						if (!parsed.feed.entry || parsed.feed.entry.length < 1) return;
+						if (!parsed.feed.entry || parsed.feed.entry.length < 1) return log("New vid check for channel " + element + " complete (no vids on channel)", 3);
 						if (!data.latestVids[element]) {
+							log("New vid check for channel " + element + " complete (channel is not key in data.latestVids)", 3);
 							data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 							saveFile = true;
 							return;
@@ -124,7 +125,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 						};
 						data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 						data.channelNames[element] = parsed.feed.title[0];
-						log("New vid check for channel " + element + " complete", 3);
+						log("New vid check for channel " + element + " complete (feed entries scanned)", 3);
 					});
 				})
 				.catch((err) => {
@@ -143,7 +144,7 @@ function saveDataFile() {
 };
 
 function subscribe(channelIds) {
-	log("subscribe function ran", 3);
+	log("subscribe function ran. Args:\t" + JSON.stringify(channelIds), 3);
 	for (i in channelIds) {
 		if (channels.includes(channelIds[i])) {
 			log("Channel " + channelIds[i] + " was not subscribed to because it already is subscribed to!", 1);
@@ -154,7 +155,7 @@ function subscribe(channelIds) {
 };
 
 function msg(text, obj) {
-	log("msg function ran", 3);
+	log("msg function ran. Args:\t" + text + "\t" + JSON.stringify(obj), 3);
 	return text
 		.replaceAll("{vidName}", obj.vid.name)
 		.replaceAll("{vidUrl}", obj.vid.url)
@@ -176,19 +177,19 @@ function getSubscriptions() {
 };
 
 function unsubscribe(channelIds) {
-	log("unsubscribe function ran", 3);
+	log("unsubscribe function ran. Args:\t" + JSON.stringify(channelIds), 3);
 	channelIds.forEach(element => {
 		channels.splice(channels.indexOf(element), 1);
 	});
 };
 
 function getChannelName(channelId) {
-	log("getChannelName function ran", 3);
+	log("getChannelName function ran. Args:\t" + channelId, 3);
 	return data.channelNames[channelId];
 };
 
 function permanentSubscribe(channelIds) {
-	log("permanentSubscribe function ran", 3);
+	log("permanentSubscribe function ran. Args:\t" + JSON.stringify(channelIds), 3);
 	setTimeout(() => {
 		subscribe(channelIds);
 		for (i in channelIds) {
@@ -203,7 +204,7 @@ function permanentSubscribe(channelIds) {
 };
 
 function permanentUnsubscribe(channelIds) {
-	log("permanentUnsubscribe function ran", 3);
+	log("permanentUnsubscribe function ran. Args:\t" + JSON.stringify(channelIds), 3);
 	setTimeout(() => {
 		unsubscribe(channelIds);
 		channelIds.forEach(element => {
@@ -214,7 +215,7 @@ function permanentUnsubscribe(channelIds) {
 };
 
 function delChannelsData(channelIds) {
-	log("delChannelsData function ran", 3);
+	log("delChannelsData function ran. Args:" + JSON.stringify(channelIds), 3);
 	permanentUnsubscribe(channelIds);
 	channelIds.forEach(element => {
 		delete data.latestVids[element];
