@@ -122,6 +122,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 								}
 							};
 							events.emit("newVid", obj);
+							log("newVid event emitted. Vid ID: " + obj.vid.id, 3);
 						};
 						data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 						data.channelNames[element] = parsed.feed.title[0];
