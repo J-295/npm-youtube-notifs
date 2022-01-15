@@ -69,4 +69,4 @@ ytNotifs.permanentUnsubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently unsu
 ytNotifs.delChannelsData(["UCBa659QWEk1AI4Tg--mrJ2A"]); // permanently unsubscribe from an array of channels and delete all data about those channels
 ytNotifs.saveDataFile(); // saves the data file
 ```
-Have any issues, questions or suggestions? Open a Github issue [here](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).
+Have any issues, questions or suggestions? [Join my Discord server](https://discord.com/invite/dcAwVFj2Pf) or [open a Github issue](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).
