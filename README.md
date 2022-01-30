@@ -43,7 +43,7 @@ ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g", "UCS0N5baNlQWJCUrhCEo8WlA"]); //
 const ytNotifs = require("youtube-notifs");
 ytNotifs.start();
 ytNotifs.events.on("newVid", (obj) => {
-    var discordChannelId;
+    let discordChannelId;
     switch (obj.vid.id) {
         case "UC7bD_GEqdgUDCe_cyVa6Y2g":
             discordChannelId = "521539885237272586";

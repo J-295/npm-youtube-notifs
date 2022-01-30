@@ -5,12 +5,12 @@ const EventEmitter = require("events");
 const events = new EventEmitter();
 const path = require("path");
 
-var debugModeEnabled = false;
-var saveFile = false;
-var dataFilePath;
-var preventDuplicateSubscriptions;
-var channels = [];
-var data = {
+let debugModeEnabled = false;
+let saveFile = false;
+let dataFilePath;
+let preventDuplicateSubscriptions;
+let channels = [];
+let data = {
 	"latestVids": {},
 	"channelNames": {},
 	"permanentSubscriptions": []
