@@ -85,6 +85,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 			});
 		};
 	});
+	let newVids = [];
 	setInterval(() => {
 		channels.forEach(element => {
 			log("Doing new vid check for channel " + element + "...", 3);
@@ -99,6 +100,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 							saveFile = true;
 							return;
 						};
+						newVids = [];
 						for (i in parsed.feed.entry) {
 							if (parsed.feed.entry[i]["yt:videoId"][0] === data.latestVids[element]) break;
 							const obj = {
@@ -121,9 +123,12 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 									id: parsed.feed["yt:channelId"][0]
 								}
 							};
+							newVids.push(obj);
+						};
+						newVids.reverse().forEach(obj => {
 							events.emit("newVid", obj);
 							log("newVid event emitted. Vid ID: " + obj.vid.id, 3);
-						};
+						});
 						data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 						data.channelNames[element] = parsed.feed.title[0];
 						log("New vid check for channel " + element + " complete (feed entries scanned)", 3);
