@@ -125,6 +125,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 							};
 							newVids.push(obj);
 						};
+						if (newVids.length !== 0) saveFile = true;
 						newVids.reverse().forEach(obj => {
 							events.emit("newVid", obj);
 							log("newVid event emitted. Vid ID: " + obj.vid.id, 3);
