@@ -6,7 +6,6 @@ const events = new EventEmitter();
 const path = require("path");
 
 let debugModeEnabled = false;
-let saveFile = false;
 let dataFilePath;
 let preventDuplicateSubscriptions;
 let channels = [];
@@ -35,35 +34,23 @@ function log(line, type) {
 	};
 };
 
-function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDuplicateSubscriptions, dataFileAutoSaveIntervalInSeconds, inputDebugModeEnabled) {
+function saveDataFile() {
+	log("Attempting to save data file...", 3);
+	fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
+		if (err) return log(err, 2);
+		log("Data file saved", 3);
+	});
+};
+
+function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputDebugModeEnabled) {
 	if (typeof (newVidCheckIntervalInSeconds) === "undefined") newVidCheckIntervalInSeconds = 120;
 	if (typeof (inputDataFilePath) === "undefined") {
 		dataFilePath = "./ytNotifsData.json";
 	} else {
 		dataFilePath = inputDataFilePath;
 	};
-	if (typeof (inputPreventDuplicateSubscriptions) === "undefined") {
-		preventDuplicateSubscriptions = true;
-	} else {
-		preventDuplicateSubscriptions = inputPreventDuplicateSubscriptions;
-	};
-	if (typeof (dataFileAutoSaveIntervalInSeconds) === "undefined") dataFileAutoSaveIntervalInSeconds = 60;
 	if (inputDebugModeEnabled) debugModeEnabled = true;
-	log("start function ran. Args:\t" + newVidCheckIntervalInSeconds + "\t" + inputDataFilePath + "\t" + inputPreventDuplicateSubscriptions + "\t" + dataFileAutoSaveIntervalInSeconds + "\t" + inputDebugModeEnabled, 3);
-	if (dataFileAutoSaveIntervalInSeconds !== 0) {
-		setInterval(() => {
-			if (saveFile) {
-				saveFile = false;
-				log("Attempting to save data file (reason: auto save interval)...", 3);
-				fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-					if (err) return log(err, 2);
-					log("Data file saved", 3);
-				});
-			} else {
-				log("Data file not saved this time in auto save interval as saveFile bool is false", 3);
-			};
-		}, dataFileAutoSaveIntervalInSeconds * 1000);
-	};
+	log("start function ran. Args:\t" + newVidCheckIntervalInSeconds + "\t" + inputDataFilePath + "\t" + inputDebugModeEnabled, 3);
 	fs.stat(dataFilePath, (err, stat) => {
 		if (err && err.code === "ENOENT") {
 			log("Data file does not exist, attempting to create...", 3);
@@ -86,6 +73,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 		};
 	});
 	let newVids = [];
+	let saveFile = false;
 	setInterval(() => {
 		channels.forEach(element => {
 			log("Doing new vid check for channel " + element + "...", 3);
@@ -125,7 +113,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 							};
 							newVids.push(obj);
 						};
-						if (newVids.length !== 0) saveFile = true;
+						if (newVids.length > 0) saveFile = true;
 						newVids.reverse().forEach(obj => {
 							events.emit("newVid", obj);
 							log("newVid event emitted. Vid ID: " + obj.vid.id, 3);
@@ -139,15 +127,11 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath, inputPreventDupl
 					log(err, 2);
 				});
 		});
+		if (saveFile) {
+			saveFile = false;
+			saveDataFile();
+		};
 	}, newVidCheckIntervalInSeconds * 1000);
-};
-
-function saveDataFile() {
-	log("Attempting to save data file (reason: saveDataFile function ran)...", 3);
-	fs.writeFile(dataFilePath, JSON.stringify(data), (err) => {
-		if (err) return log(err, 2);
-		log("Data file saved", 3);
-	});
 };
 
 function subscribe(channelIds) {
@@ -206,7 +190,7 @@ function permanentSubscribe(channelIds) {
 			};
 			data.permanentSubscriptions.push(channelIds[i]);
 		};
-		saveFile = true;
+		saveDataFile();
 	}, 100);
 };
 
@@ -217,7 +201,7 @@ function permanentUnsubscribe(channelIds) {
 		channelIds.forEach(element => {
 			data.permanentSubscriptions.splice(data.permanentSubscriptions.indexOf(element), 1);
 		});
-		saveFile = true;
+		saveDataFile();
 	}, 100);
 };
 
@@ -228,7 +212,7 @@ function delChannelsData(channelIds) {
 		delete data.latestVids[element];
 		delete data.channelNames[element];
 	});
-	saveFile = true;
+	saveDataFile();
 };
 
 module.exports = {
@@ -241,6 +225,5 @@ module.exports = {
 	permanentSubscribe,
 	permanentUnsubscribe,
 	delChannelsData,
-	saveDataFile,
 	events
 };
