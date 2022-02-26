@@ -23,14 +23,14 @@ ytNotifs.events.on("newVid", (obj) => { // obj is an object containing video inf
      *   {channelId}
      */
 });
-ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // args: channel id
+ytNotifs.subscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // args: array of channel IDs
 ```
 ```js
 /*
  * Example Two
  */
 const ytNotifs = require("youtube-notifs");
-ytNotifs.start(); // defaults will be used: 120, "./ytNotifsData.json", true, 60, false
+ytNotifs.start(); // defaults will be used: 120, "./ytNotifsData.json"
 ytNotifs.events.on("newVid", (obj) => {
     console.log(obj.channel.name + " just uploaded a new video!\n" + obj.vid.url);
 });
@@ -67,5 +67,12 @@ console.log("Name of channel: " + ytNotifs.getChannelName("UC7bD_GEqdgUDCe_cyVa6
 ytNotifs.permanentSubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently subscribe to an array of channels
 ytNotifs.permanentUnsubscribe(["UC7bD_GEqdgUDCe_cyVa6Y2g"]); // permanently unsubscribe from an array of channels
 ytNotifs.delChannelsData(["UCBa659QWEk1AI4Tg--mrJ2A"]); // permanently unsubscribe from an array of channels and delete all data about those channels
+```
+```js
+/*
+ * How to disable ANSI colours
+ */
+const jbLogger = require("@james-bennett-295/logger");
+jbLogger.config({ useAnsiColours: false });
 ```
 Have any issues, questions or suggestions? [Join my Discord server](https://discord.com/invite/dcAwVFj2Pf) or [open a Github issue](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).

@@ -1,6 +1,6 @@
 {
   "name": "youtube-notifs",
-  "version": "2.8.0",
+  "version": "2.8.1",
   "description": "Get a notification when certain youtube channels upload a new video!",
   "main": "./index.js",
   "scripts": {},
