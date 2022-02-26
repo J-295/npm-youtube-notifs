@@ -1,3 +1,5 @@
+"use strict";
+
 const fs = require("fs");
 const axios = require("axios");
 const parseXml = require("xml2js").parseString;
