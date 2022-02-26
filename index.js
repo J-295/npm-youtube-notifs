@@ -109,10 +109,12 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
 					logger.error("[youtube-notifs]: Failed to fetch data from youtube: " + err);
 				});
 		});
-		if (saveFile) {
-			saveFile = false;
-			saveDataFile();
-		};
+		setTimeout(() => {
+			if (saveFile) {
+				saveFile = false;
+				saveDataFile();
+			};
+		}, 250);
 	}, newVidCheckIntervalInSeconds * 1000);
 };
 
