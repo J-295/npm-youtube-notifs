@@ -73,7 +73,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
 							return;
 						};
 						newVids = [];
-						for (i in parsed.feed.entry) {
+						for (let i in parsed.feed.entry) {
 							if (parsed.feed.entry[i]["yt:videoId"][0] === data.latestVids[element]) break;
 							const obj = {
 								vid: {
@@ -120,7 +120,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
 
 function subscribe(channelIds) {
 	logger.debug("[youtube-notifs]: subscribe function ran. Args:\t" + JSON.stringify(channelIds));
-	for (i in channelIds) {
+	for (let i in channelIds) {
 		if (channels.includes(channelIds[i])) {
 			logger.warn("[youtube-notifs]: Channel " + channelIds[i] + " was not subscribed to because it is already subscribed to!");
 			continue;
@@ -167,7 +167,7 @@ function permanentSubscribe(channelIds) {
 	logger.debug("[youtube-notifs]: permanentSubscribe function ran. Args:\t" + JSON.stringify(channelIds));
 	setTimeout(() => {
 		subscribe(channelIds);
-		for (i in channelIds) {
+		for (let i in channelIds) {
 			if (data.permanentSubscriptions.includes(channelIds[i])) {
 				logger.warn("[youtube-notifs]: Channel " + channelIds[i] + " was not permanently subscribed to because it already is permanently subscribed to!");
 				continue;
