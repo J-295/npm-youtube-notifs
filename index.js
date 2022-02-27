@@ -25,6 +25,11 @@ function saveDataFile() {
 };
 
 function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
+
+	setTimeout(() => {
+		logger.triggerAlert();
+	}, 2500);
+
 	if (typeof (newVidCheckIntervalInSeconds) === "undefined") newVidCheckIntervalInSeconds = 120;
 	if (typeof (inputDataFilePath) === "undefined") {
 		dataFilePath = "./ytNotifsData.json";
