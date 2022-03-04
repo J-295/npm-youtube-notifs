@@ -63,6 +63,7 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
 	});
 	let newVids = [];
 	let saveFile = false;
+	let allVidIds = [];
 	setInterval(() => {
 		channels.forEach(element => {
 			logger.debug("[youtube-notifs]: Doing new vid check for channel " + element + "...");
@@ -75,6 +76,16 @@ function start(newVidCheckIntervalInSeconds, inputDataFilePath) {
 							logger.debug("[youtube-notifs]: New vid check for channel " + element + " complete (channel is not key in data.latestVids)");
 							data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
 							saveFile = true;
+							return;
+						};
+						allVidIds = parsed.feed.entry.map(vid => vid["yt:videoId"][0]);
+						if (!allVidIds.includes(data.latestVids[element])) {
+							logger.debug(
+								"[youtube-notifs]: New vid check for channel " + element + " complete (no video with ID of latestVids[i])\n" +
+								"\tlatestVids[i] will be set to ID of latest video in channel"
+							);
+							data.latestVids[element] = parsed.feed.entry[0]["yt:videoId"][0];
+							saveDataFile();
 							return;
 						};
 						newVids = [];
