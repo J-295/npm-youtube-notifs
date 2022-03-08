@@ -15,6 +15,7 @@ let data = {
 	"channelNames": {},
 	"permanentSubscriptions": []
 };
+let checkIntervalId;
 
 function saveDataFile() {
 	logger.debug("[youtube-notifs]: Attempting to save data file...");
@@ -59,7 +60,7 @@ function start(newVidCheckInterval, inputDataFilePath) {
 	let saveFile = false;
 	let allVidIds = [];
 	let vidObj = {};
-	setInterval(() => {
+	checkIntervalId = setInterval(() => {
 		subscriptions.forEach(channelId => {
 			logger.debug("[youtube-notifs]: Doing new vid check for channel " + channelId + "...");
 			axios.get("https://www.youtube.com/feeds/videos.xml?channel_id=" + channelId)
@@ -127,6 +128,11 @@ function start(newVidCheckInterval, inputDataFilePath) {
 			saveDataFile();
 		};
 	}, newVidCheckInterval * 1000);
+};
+
+function stop() {
+	logger.debug("[youtube-notifs]: stop function ran");
+	clearInterval(checkIntervalId);
 };
 
 function subscribe(channelIds) {
@@ -212,6 +218,7 @@ function delChannelsData(channelIds) {
 
 module.exports = {
 	start,
+	stop,
 	subscribe,
 	msg,
 	getSubscriptions,
