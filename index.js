@@ -26,9 +26,7 @@ function saveDataFile() {
 
 function start(newVidCheckInterval, inputDataFilePath) {
 
-	setTimeout(() => {
-		logger.triggerAlert();
-	}, 1000);
+	logger.triggerAlert();
 
 	if (typeof (newVidCheckInterval) === "undefined") newVidCheckInterval = 120;
 	if (typeof (inputDataFilePath) !== "undefined") dataFilePath = inputDataFilePath;
