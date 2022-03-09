@@ -120,6 +120,7 @@ function start(newVidCheckInterval, inputDataFilePath) {
 					});
 				})
 				.catch((err) => {
+					if (err.response.status === 404) return logger.error("[youtube-notifs]: Failed to fetch data for channel '" + channelId + "' with status code 404. Make sure the channel exists!");
 					logger.error("[youtube-notifs]: Failed to fetch data: " + err);
 				});
 		});
