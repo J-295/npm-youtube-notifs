@@ -1,6 +1,4 @@
 node_modules/
+data.json
 package-lock.json
-test.js
-ytNotifsData.json
-.vscode
-todo
+test.mjs
