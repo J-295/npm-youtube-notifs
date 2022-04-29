@@ -1,4 +1,10 @@
 Get notified when Youtube videos are uploaded!
+
+
+<b><u>This package is only compatible with the ECMAScript standard of JavaScript.<br>
+If you don't use that, you can use the [yt-notifs](https://www.npmjs.com/package/yt-notifs) package instead.</u></b>
+<br><br>
+
 ```js
 /*
  * Example
