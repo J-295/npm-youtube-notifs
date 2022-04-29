@@ -4,7 +4,7 @@ import https from "node:https";
 import { parseString as parseXml } from "xml2js";
 import writeFile from "@james-bennett-295/writefile";
 
-const dataFileNamePattern = /^(([a-zA-Z0-9\-]*|\.{0,2})\/)*[a-zA-Z0-9\-]*\.json$/;
+const dataFileNamePattern = /^(([a-zA-Z0-9\-]*|\.{0,2})\/)*[a-zA-Z0-9\-]+\.json$/;
 const channelIdPattern = /^[a-zA-Z0-9_\-]{24}$/;
 
 class Notifier extends EventEmitter {
