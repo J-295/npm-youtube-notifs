@@ -1,6 +1,6 @@
 {
   "name": "youtube-notifs",
-  "version": "3.0.1",
+  "version": "3.0.2",
   "description": "Get notified when Youtube videos are uploaded!",
   "main": "./index.mjs",
   "scripts": {
