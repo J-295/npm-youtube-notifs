@@ -1,11 +1,9 @@
 {
   "name": "youtube-notifs",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "description": "Get notified when Youtube videos are uploaded!",
   "main": "./index.mjs",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git+https://github.com/James-Bennett-295/npm-youtube-notifs.git"
@@ -19,7 +17,8 @@
     "notifier",
     "subscribe",
     "subscription",
-    "watch"
+    "watch",
+    "sqlite3"
   ],
   "author": "James Bennett",
   "license": "MIT",
@@ -29,6 +28,10 @@
   "homepage": "https://github.com/James-Bennett-295/npm-youtube-notifs#readme",
   "dependencies": {
     "@james-bennett-295/writefile": "^1.0.0",
+    "key-value-pairs": "^1.0.2",
     "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "sqlite3": "^5.0.8"
   }
 }
