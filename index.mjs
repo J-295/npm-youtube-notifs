@@ -88,7 +88,7 @@ class Notifier extends EventEmitter {
 						parseXml(xml, (err, channelData) => {
 							if (err !== null) return this.emit("error", err);
 
-							if (channelData.feed.entry.length === 0) return;
+							if (!channelData.feed.entry) return;
 							if (typeof this.data.latestVids[channelId] === "undefined") {
 								this.data.latestVids[channelId] = channelData.feed.entry[0]["yt:videoId"][0];
 								saveData = true;
