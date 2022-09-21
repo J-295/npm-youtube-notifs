@@ -1,8 +1,8 @@
 {
   "name": "youtube-notifs",
-  "version": "3.0.5",
+  "version": "3.0.6",
   "description": "Get notified when Youtube videos are uploaded!",
-  "main": "./index.mjs",
+  "main": "./index.js",
   "scripts": {},
   "repository": {
     "type": "git",
@@ -27,8 +27,8 @@
   },
   "homepage": "https://github.com/James-Bennett-295/npm-youtube-notifs#readme",
   "dependencies": {
-    "@james-bennett-295/writefile": "^1.0.0",
-    "key-value-pairs": "^1.0.2",
+    "@james-bennett-295/writefile": "^1.0.2",
+    "key-value-pairs": "^1.0.3",
     "xml2js": "^0.4.23"
   },
   "devDependencies": {

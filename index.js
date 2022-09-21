@@ -1,9 +1,11 @@
-import EventEmitter from "node:events";
-import fs from "node:fs";
-import https from "node:https";
-import { parseString as parseXml } from "xml2js";
-import writeFile from "@james-bennett-295/writefile";
-import keyValPairs from "key-value-pairs";
+"use strict";
+
+const EventEmitter = require("node:events");
+const fs = require("node:fs");
+const https = require("node:https");
+const { parseString: parseXml } = require("xml2js");
+const writeFile = require("@james-bennett-295/writefile");
+const keyValPairs = require("key-value-pairs");
 
 const dataFileNamePattern = /^(([a-zA-Z0-9_\-]*|\.{0,2})\/)*[a-zA-Z0-9_\-]+\.json$/;
 const dbTablePrefixPattern = /^[a-zA-Z0-9_]+$/;
@@ -322,7 +324,7 @@ function msg(txt, obj) {
 		.replaceAll("{channelId}", obj.channel.id);
 }
 
-export default {
+module.exports = {
 	Notifier,
 	msg
 }
