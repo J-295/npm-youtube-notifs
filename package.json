@@ -4,7 +4,7 @@
 	"description": "Receive events from youtube video releases",
 	"main": "./build/index.js",
 	"scripts": {
-		"build": "npx tsc"
+		"build": "rm -rf ./build/ && npx tsc"
 	},
 	"repository": {
 		"type": "git",
