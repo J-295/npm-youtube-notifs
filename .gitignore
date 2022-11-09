@@ -1,6 +1,4 @@
 node_modules/
-data.json
+testData/
 package-lock.json
-test.mjs
-test-db.sqlite3
-todo
+test.js
