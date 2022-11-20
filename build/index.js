@@ -8,12 +8,6 @@ const getChannelData_1 = __importDefault(require("./util/getChannelData"));
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
-let x = {
-    latestVids: {
-        "a": "a",
-        "b": "c"
-    }
-};
 class Notifier extends node_events_1.default {
     constructor(newVidCheckInterval, dataFileName) {
         super();

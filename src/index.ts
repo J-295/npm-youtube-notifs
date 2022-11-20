@@ -11,13 +11,6 @@ type Data = {
 	}
 }
 
-let x: Data = {
-	latestVids: {
-		"a": "a",
-		"b": "c"
-	}
-}
-
 class Notifier extends EventEmitter {
 	readonly subscriptions: Array<string> = [];
 	private checkInterval: number; // In milliseconds
