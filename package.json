@@ -3,7 +3,7 @@
 	"version": "4.0.2",
 	"description": "Receive events from youtube video releases",
 	"main": "./build/index.js",
-	"types": "./src/index.ts",
+	"types": "./build/index.d.ts",
 	"scripts": {
 		"build": "rm -rf ./build/ && npx tsc"
 	},
