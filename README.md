@@ -2,7 +2,7 @@ Receive events from youtube video releases!
 
 <u>Typescript example</u>
 ```ts
-import Notifier from "youtube-notifs";
+import { Notifier } from "youtube-notifs";
 
 // Args: new video check interval in seconds, data file path
 const notifier = new Notifier(60*60, "./ytNotifsData.json");
@@ -26,7 +26,7 @@ notifier.start();
 
 <u>Importing the package when not using TypeScript or ECMAScript</u>
 ```js
-const Notifier = require("youtube-notifs").default;
+const { Notifier } = require("youtube-notifs");
 ```
 
 Have any issues, questions or suggestions? [Join my Discord server](https://discord.com/invite/dcAwVFj2Pf) or [open a Github issue](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).

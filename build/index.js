@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.Notifier = void 0;
 const node_events_1 = __importDefault(require("node:events"));
 const getChannelData_1 = __importDefault(require("./util/getChannelData"));
 const node_fs_1 = __importDefault(require("node:fs"));
@@ -193,4 +194,5 @@ class Notifier extends node_events_1.default {
         }
     }
 }
-exports.default = Notifier;
+exports.Notifier = Notifier;
+exports.default = Notifier; // For backwards compatibility

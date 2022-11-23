@@ -189,4 +189,5 @@ class Notifier extends EventEmitter {
 	}
 }
 
-export default Notifier;
+export default Notifier; // For backwards compatibility
+export { Notifier }
