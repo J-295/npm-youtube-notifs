@@ -1,8 +1,9 @@
 {
 	"name": "youtube-notifs",
-	"version": "4.0.0",
+	"version": "4.0.1",
 	"description": "Receive events from youtube video releases",
 	"main": "./build/index.js",
+	"types": "./src/index.ts",
 	"scripts": {
 		"build": "rm -rf ./build/ && npx tsc"
 	},
