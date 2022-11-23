@@ -15,7 +15,7 @@ function default_1(channelId) {
                 let channel = {
                     title: parsedXml.feed.title[0],
                     url: parsedXml.feed.link[1].$.href,
-                    id: parsedXml.feed["yt:channelId"][0],
+                    id: channelId,
                     released: new Date(parsedXml.feed.published[0]),
                     videos: []
                 };
