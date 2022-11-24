@@ -7,7 +7,7 @@ const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 
 type Data = {
 	latestVids: {
-		[key: string]: string // Allows however many key val pairs
+		[key: string]: string | null // Allows however many key val pairs
 	}
 }
 
@@ -56,7 +56,7 @@ class Notifier extends EventEmitter {
 			return;
 		}
 		this.emit("debug", `saving data`);
-		fs.mkdir(path.dirname(this.dataFile), {recursive: true}, (err) => {
+		fs.mkdir(path.dirname(this.dataFile), { recursive: true }, (err) => {
 			if (err !== null) {
 				this.emit("error", err);
 				return;
@@ -77,7 +77,10 @@ class Notifier extends EventEmitter {
 					const prevLatestVidId = this.data.latestVids[channel.id];
 					this.emit("debug", `[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
 					this.emit("debug", `[${channel.id}] vid count: ${channel.videos.length}`);
-					if (channel.videos.length === 0) return;
+					if (channel.videos.length === 0) {
+						this.data.latestVids[channel.id] = null;
+						return;
+					}
 					if (prevLatestVidId === undefined) {
 						this.emit("debug", `[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
 						this.data.latestVids[channel.id] = channel.videos[0].id;
@@ -86,13 +89,15 @@ class Notifier extends EventEmitter {
 					}
 					const vidIds = channel.videos.map(v => v.id);
 					this.emit("debug", `[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
-					if (vidIds.includes(prevLatestVidId)) {
-						this.emit("debug", `[${channel.id}] vidIds includes prevLatestVidId`);
-					} else {
-						this.emit("debug", `[${channel.id}] vidIds not includes prevLatestVidId`);
-						this.data.latestVids[channel.id] = channel.videos[0].id;
-						this.saveData();
-						return;
+					if (prevLatestVidId !== null) {
+						if (vidIds.includes(prevLatestVidId)) {
+							this.emit("debug", `[${channel.id}] vidIds includes prevLatestVidId`);
+						} else {
+							this.emit("debug", `[${channel.id}] vidIds not includes prevLatestVidId`);
+							this.data.latestVids[channel.id] = channel.videos[0].id;
+							this.saveData();
+							return;
+						}
 					}
 					let newVids = [];
 					for (let j = 0; j < channel.videos.length; j++) {

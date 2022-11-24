@@ -77,8 +77,11 @@ class Notifier extends node_events_1.default {
                 const prevLatestVidId = this.data.latestVids[channel.id];
                 this.emit("debug", `[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
                 this.emit("debug", `[${channel.id}] vid count: ${channel.videos.length}`);
-                if (channel.videos.length === 0)
+                if (channel.videos.length === 0) {
+                    this.emit("debug", `[${channel.id}] channel has no vids`);
+                    this.data.latestVids[channel.id] = null;
                     return;
+                }
                 if (prevLatestVidId === undefined) {
                     this.emit("debug", `[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
                     this.data.latestVids[channel.id] = channel.videos[0].id;
@@ -87,14 +90,16 @@ class Notifier extends node_events_1.default {
                 }
                 const vidIds = channel.videos.map(v => v.id);
                 this.emit("debug", `[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
-                if (vidIds.includes(prevLatestVidId)) {
-                    this.emit("debug", `[${channel.id}] vidIds includes prevLatestVidId`);
-                }
-                else {
-                    this.emit("debug", `[${channel.id}] vidIds not includes prevLatestVidId`);
-                    this.data.latestVids[channel.id] = channel.videos[0].id;
-                    this.saveData();
-                    return;
+                if (prevLatestVidId !== null) {
+                    if (vidIds.includes(prevLatestVidId)) {
+                        this.emit("debug", `[${channel.id}] vidIds includes prevLatestVidId`);
+                    }
+                    else {
+                        this.emit("debug", `[${channel.id}] vidIds not includes prevLatestVidId`);
+                        this.data.latestVids[channel.id] = channel.videos[0].id;
+                        this.saveData();
+                        return;
+                    }
                 }
                 let newVids = [];
                 for (let j = 0; j < channel.videos.length; j++) {
