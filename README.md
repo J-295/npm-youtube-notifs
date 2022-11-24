@@ -25,7 +25,7 @@ notifier.start();
 ```
 
 **Javascript example**
-```ts
+```js
 const { Notifier } = require("youtube-notifs");
 
 // Args: new video check interval in seconds, data file path
