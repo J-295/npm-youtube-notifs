@@ -1,5 +1,5 @@
 import EventEmitter from "node:events";
-import getChannelData from "./util/getChannelData";
+import { getChannelData, Video } from "./util/getChannelData";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -190,4 +190,4 @@ class Notifier extends EventEmitter {
 }
 
 export default Notifier; // For backwards compatibility
-export { Notifier }
+export { Notifier, Video }

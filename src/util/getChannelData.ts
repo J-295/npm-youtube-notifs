@@ -30,7 +30,7 @@ type Channel = {
 	videos: Array<Video>
 }
 
-export default function(channelId: string) {
+function getChannelData(channelId: string) {
 	return new Promise<Channel>((resolve, reject) => {
 		get(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`)
 			.then((xml) => {
@@ -76,3 +76,5 @@ export default function(channelId: string) {
 			});
 	});
 }
+
+export { getChannelData, Video }
