@@ -5,7 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Notifier = void 0;
 const node_events_1 = __importDefault(require("node:events"));
-const getChannelData_1 = __importDefault(require("./util/getChannelData"));
+const getChannelData_1 = require("./util/getChannelData");
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
@@ -72,7 +72,7 @@ class Notifier extends node_events_1.default {
         this.emit("debug", `\n## DOING CHECK ##`);
         for (let i = 0; i < this.subscriptions.length; i++) {
             this.emit("debug", `checking channel ${this.subscriptions[i]}`);
-            (0, getChannelData_1.default)(this.subscriptions[i])
+            (0, getChannelData_1.getChannelData)(this.subscriptions[i])
                 .then((channel) => {
                 const prevLatestVidId = this.data.latestVids[channel.id];
                 this.emit("debug", `[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);

@@ -25,5 +25,5 @@ declare type Channel = {
     released: Date;
     videos: Array<Video>;
 };
-export default function (channelId: string): Promise<Channel>;
-export {};
+declare function getChannelData(channelId: string): Promise<Channel>;
+export { getChannelData, Video };

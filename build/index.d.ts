@@ -1,5 +1,6 @@
 /// <reference types="node" />
 import EventEmitter from "node:events";
+import { Video } from "./util/getChannelData";
 declare class Notifier extends EventEmitter {
     readonly subscriptions: Array<string>;
     private checkInterval;
@@ -19,4 +20,4 @@ declare class Notifier extends EventEmitter {
     unsubscribe(channels: string | Array<string>): void;
 }
 export default Notifier;
-export { Notifier };
+export { Notifier, Video };

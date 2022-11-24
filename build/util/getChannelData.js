@@ -3,9 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.getChannelData = void 0;
 const httpsGet_1 = __importDefault(require("./httpsGet"));
 const xml2js_1 = __importDefault(require("xml2js"));
-function default_1(channelId) {
+function getChannelData(channelId) {
     return new Promise((resolve, reject) => {
         (0, httpsGet_1.default)(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`)
             .then((xml) => {
@@ -53,4 +54,4 @@ function default_1(channelId) {
         });
     });
 }
-exports.default = default_1;
+exports.getChannelData = getChannelData;
