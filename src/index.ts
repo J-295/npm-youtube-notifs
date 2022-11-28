@@ -165,7 +165,8 @@ class Notifier extends EventEmitter {
 		this.subscriptions.push(channel);
 	}
 	subscribe(channels: string | Array<string>): void {
-		this.emit("debug", `subscribe() called with arg ${typeof channels === "string" ? channels : JSON.stringify(channels)}`);
+		const argIsString = typeof channels === "string";
+		this.emit("debug", `subscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
 		if (typeof channels === "string") {
 			this._subscribe(channels);
 		} else {
@@ -183,7 +184,8 @@ class Notifier extends EventEmitter {
 		this.subscriptions.splice(index, 1);
 	}
 	unsubscribe(channels: string | Array<string>): void {
-		this.emit("debug", `unsubscribe() called with arg ${typeof channels === "string" ? channels : JSON.stringify(channels)}`);
+		const argIsString = typeof channels === "string";
+		this.emit("debug", `unsubscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
 		if (typeof channels === "string") {
 			this._unsubscribe(channels);
 		} else {
