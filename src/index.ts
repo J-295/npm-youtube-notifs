@@ -134,7 +134,7 @@ class Notifier extends EventEmitter {
 			this.emit("error", new Error("start() was ran while the notifier was active."));
 			return;
 		}
-		this.emit("debug", `checkInterval is ${this.checkInterval}, dataFile is "${this.dataFile}"`);
+		this.emit("debug", `checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
 		this.getData()
 			.then(() => {
 				this.doCheck();
