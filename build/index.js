@@ -18,31 +18,48 @@ class Notifier extends node_events_1.default {
         this.data = {
             latestVids: {}
         };
+        this.onError = null;
+        this.onDebug = null;
+        this.onNewVideo = null;
+        this.on("error", () => { }); // For backwards compatibility, remove 2024  |  So program stays alive when no listener set
         this.checkInterval = newVidCheckInterval * 1000;
         this.dataFile = (dataFileName === undefined) ? null : node_path_1.default.resolve(dataFileName);
+    }
+    emitError(err) {
+        this.emit("error", err); // For backwards compatibility, remove 2024
+        if (this.onError === null) {
+            throw err;
+        }
+        else {
+            this.onError(err);
+        }
+    }
+    emitDebug(log) {
+        if (this.onDebug !== null)
+            this.onDebug(log);
     }
     getData() {
         return new Promise((resolve) => {
             if (this.dataFile === null) {
-                this.emit("debug", `not getting data as dataFile is null`);
+                this.emitDebug(`not getting data as dataFile is null`);
                 return resolve();
             }
             if (!node_fs_1.default.existsSync(this.dataFile)) {
-                this.emit("debug", `data file not exists`);
+                this.emitDebug(`data file not exists`);
                 return resolve();
             }
-            this.emit("debug", `reading data file...`);
+            this.emitDebug(`reading data file...`);
             node_fs_1.default.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
                 if (err !== null) {
-                    this.emit("error", err);
+                    this.emitError(err);
                     return resolve();
                 }
-                this.emit("debug", `data file read. Got text:  ${txt}\n\n[TEXT END]`);
+                this.emitDebug(`data file read. Got text:  ${txt}\n\n[TEXT END]`);
                 try {
                     this.data = JSON.parse(txt);
                 }
                 catch (err) {
-                    this.emit("error", err);
+                    this.emitError(err);
                 }
                 return resolve();
             });
@@ -50,13 +67,13 @@ class Notifier extends node_events_1.default {
     }
     saveData() {
         if (this.dataFile === null) {
-            this.emit("debug", `not saving data as dataFile is null`);
+            this.emitDebug(`not saving data as dataFile is null`);
             return;
         }
-        this.emit("debug", `saving data`);
+        this.emitDebug(`saving data`);
         node_fs_1.default.mkdir(node_path_1.default.dirname(this.dataFile), { recursive: true }, (err) => {
             if (err !== null) {
-                this.emit("error", err);
+                this.emitError(err);
                 return;
             }
             const txt = JSON.stringify(this.data);
@@ -64,37 +81,37 @@ class Notifier extends node_events_1.default {
                 return;
             node_fs_1.default.writeFile(this.dataFile, txt, (err) => {
                 if (err !== null)
-                    this.emit("error", err);
+                    this.emitError(err);
             });
         });
     }
     doCheck() {
-        this.emit("debug", `\n## DOING CHECK ##`);
+        this.emitDebug(`\n## DOING CHECK ##`);
         for (let i = 0; i < this.subscriptions.length; i++) {
-            this.emit("debug", `checking channel ${this.subscriptions[i]}`);
+            this.emitDebug(`checking channel ${this.subscriptions[i]}`);
             (0, getChannelData_1.getChannelData)(this.subscriptions[i])
                 .then((channel) => {
                 const prevLatestVidId = this.data.latestVids[channel.id];
-                this.emit("debug", `[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
-                this.emit("debug", `[${channel.id}] vid count: ${channel.videos.length}`);
+                this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
+                this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
                 if (channel.videos.length === 0) {
                     this.data.latestVids[channel.id] = null;
                     return;
                 }
                 if (prevLatestVidId === undefined) {
-                    this.emit("debug", `[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
+                    this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
                     this.data.latestVids[channel.id] = channel.videos[0].id;
                     this.saveData();
                     return;
                 }
                 const vidIds = channel.videos.map(v => v.id);
-                this.emit("debug", `[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
+                this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
                 if (prevLatestVidId !== null) {
                     if (vidIds.includes(prevLatestVidId)) {
-                        this.emit("debug", `[${channel.id}] vidIds includes prevLatestVidId`);
+                        this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
                     }
                     else {
-                        this.emit("debug", `[${channel.id}] vidIds not includes prevLatestVidId`);
+                        this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
                         this.data.latestVids[channel.id] = channel.videos[0].id;
                         this.saveData();
                         return;
@@ -103,26 +120,28 @@ class Notifier extends node_events_1.default {
                 let newVids = [];
                 for (let j = 0; j < channel.videos.length; j++) {
                     if (channel.videos[j].id === prevLatestVidId) {
-                        this.emit("debug", `[${channel.id}] reached prevLatestVidId`);
+                        this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
                         break;
                     }
                     newVids.push(channel.videos[j]);
-                    this.emit("debug", `[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
+                    this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
                 }
                 if (newVids.length === 0) {
-                    this.emit("debug", `[${channel.id}] no new vids`);
+                    this.emitDebug(`[${channel.id}] no new vids`);
                     return;
                 }
                 for (let j = newVids.length - 1; j >= 0; j--) {
-                    this.emit("newVid", newVids[j]);
-                    this.emit("debug", `[${channel.id}] emitted newVid for ${newVids[j].id}`);
+                    this.emit("newVid", newVids[j]); // For backwards compatibility, remove 2024
+                    if (this.onNewVideo !== null)
+                        this.onNewVideo(newVids[j]);
+                    this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
                 }
-                this.emit("debug", `[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
+                this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
                 this.data.latestVids[channel.id] = channel.videos[0].id;
                 this.saveData();
             })
                 .catch((err) => {
-                this.emit("error", err);
+                this.emitError(err);
             });
         }
     }
@@ -130,12 +149,12 @@ class Notifier extends node_events_1.default {
         return this.intervalId !== null;
     }
     start() {
-        this.emit("debug", `start() called`);
+        this.emitDebug(`start() called`);
         if (this.isActive()) {
-            this.emit("error", new Error("start() was ran while the notifier was active."));
+            this.emitError(new Error("start() was ran while the notifier was active."));
             return;
         }
-        this.emit("debug", `checkInterval is ${this.checkInterval}, dataFile is "${this.dataFile}"`);
+        this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
         this.getData()
             .then(() => {
             this.doCheck();
@@ -145,9 +164,9 @@ class Notifier extends node_events_1.default {
         });
     }
     stop() {
-        this.emit("debug", `stop() called`);
+        this.emitDebug(`stop() called`);
         if (!this.isActive()) {
-            this.emit("error", new Error("stop() was ran while the notifier was not active."));
+            this.emitError(new Error("stop() was ran while the notifier was not active."));
             return;
         }
         if (this.intervalId === null)
@@ -157,11 +176,11 @@ class Notifier extends node_events_1.default {
     }
     _subscribe(channel) {
         if (!channelIdPattern.test(channel)) {
-            this.emit("error", new Error(`Invalid channel ID inputted: ${channel}`));
+            this.emitError(new Error(`Invalid channel ID inputted: ${channel}`));
             return;
         }
         if (this.subscriptions.includes(channel)) {
-            this.emit("error", new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
+            this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
             return;
         }
         ;
@@ -169,7 +188,7 @@ class Notifier extends node_events_1.default {
     }
     subscribe(channels) {
         const argIsString = typeof channels === "string";
-        this.emit("debug", `subscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
+        this.emitDebug(`subscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
         if (typeof channels === "string") {
             this._subscribe(channels);
         }
@@ -182,14 +201,14 @@ class Notifier extends node_events_1.default {
     _unsubscribe(channel) {
         const index = this.subscriptions.indexOf(channel);
         if (index === -1) {
-            this.emit("error", new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${channel}`));
+            this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${channel}`));
             return;
         }
         this.subscriptions.splice(index, 1);
     }
     unsubscribe(channels) {
         const argIsString = typeof channels === "string";
-        this.emit("debug", `unsubscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
+        this.emitDebug(`unsubscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
         if (typeof channels === "string") {
             this._unsubscribe(channels);
         }
@@ -201,4 +220,4 @@ class Notifier extends node_events_1.default {
     }
 }
 exports.Notifier = Notifier;
-exports.default = Notifier; // For backwards compatibility
+exports.default = Notifier; // For backwards compatibility, remove 2024

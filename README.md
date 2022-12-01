@@ -1,4 +1,4 @@
-Receive events from youtube video releases!
+Receive events from youtube video uploads!
 
 **Typescript example**
 ```ts
@@ -7,13 +7,11 @@ import { Notifier, Video } from "youtube-notifs";
 // Args: new video check interval in seconds, data file path
 const notifier = new Notifier(60*60, "./ytNotifsData.json");
 
-notifier.on("error", (err: Error) => {
-	console.error(err);
-});
+notifier.onError = console.error;
 
-notifier.on("newVid", (video: Video) => {
+notifier.onNewVideo = (video: Video) => {
 	console.dir(video);
-});
+}
 
 // Takes a string or an array of channel IDs.
 // There is also an unsubscribe function
@@ -31,13 +29,11 @@ const { Notifier } = require("youtube-notifs");
 // Args: new video check interval in seconds, data file path
 const notifier = new Notifier(60*60, "./ytNotifsData.json");
 
-notifier.on("error", (err) => {
-	console.error(err);
-});
+notifier.onError = console.error;
 
-notifier.on("newVid", (video) => {
+notifier.onNewVideo = (video) => {
 	console.dir(video);
-});
+}
 
 // Takes a string or an array of channel IDs.
 // There is also an unsubscribe function

@@ -7,7 +7,12 @@ declare class Notifier extends EventEmitter {
     private dataFile;
     private intervalId;
     private data;
+    onError: ((err: Error) => void) | null;
+    onDebug: ((log: string) => void) | null;
+    onNewVideo: ((vid: Video) => void) | null;
     constructor(newVidCheckInterval: number, dataFileName?: string);
+    private emitError;
+    private emitDebug;
     private getData;
     private saveData;
     private doCheck;
