@@ -3,14 +3,25 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Notifier = void 0;
+exports.SubscriptionMethods = exports.DataStorageMethods = exports.Notifier = void 0;
 const node_events_1 = __importDefault(require("node:events"));
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
 const getChannelData_1 = require("./util/getChannelData");
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
+var DataStorageMethods;
+(function (DataStorageMethods) {
+    DataStorageMethods[DataStorageMethods["File"] = 0] = "File";
+    DataStorageMethods[DataStorageMethods["None"] = 1] = "None";
+})(DataStorageMethods || (DataStorageMethods = {}));
+exports.DataStorageMethods = DataStorageMethods;
+var SubscriptionMethods;
+(function (SubscriptionMethods) {
+    SubscriptionMethods[SubscriptionMethods["Polling"] = 0] = "Polling";
+})(SubscriptionMethods || (SubscriptionMethods = {}));
+exports.SubscriptionMethods = SubscriptionMethods;
 class Notifier extends node_events_1.default {
-    constructor(newVidCheckInterval, dataFileName) {
+    constructor(config_or_newVidCheckInterval, dataFileName) {
         super();
         this.subscriptions = [];
         this.dataFile = null;
@@ -21,9 +32,23 @@ class Notifier extends node_events_1.default {
         this.onError = null;
         this.onDebug = null;
         this.onNewVideo = null;
+        const config = (typeof config_or_newVidCheckInterval === "number") ?
+            {
+                subscription: {
+                    method: SubscriptionMethods.Polling,
+                    interval: Math.ceil(config_or_newVidCheckInterval / 60)
+                },
+                dataStorage: (dataFileName === undefined) ? {
+                    method: DataStorageMethods.None
+                } : {
+                    method: DataStorageMethods.File,
+                    file: dataFileName
+                }
+            }
+            : config_or_newVidCheckInterval;
         this.on("error", () => { }); // For backwards compatibility, remove 2024  |  So program stays alive when no listener set
-        this.checkInterval = newVidCheckInterval * 1000;
-        this.dataFile = (dataFileName === undefined) ? null : node_path_1.default.resolve(dataFileName);
+        this.checkInterval = config.subscription.interval * 60 * 1000;
+        this.dataFile = (config.dataStorage.file === undefined) ? null : node_path_1.default.resolve(config.dataStorage.file);
     }
     emitError(err) {
         this.emit("error", err); // For backwards compatibility, remove 2024

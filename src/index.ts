@@ -6,6 +6,30 @@ import { HttpError } from "./util/httpsGet";
 
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 
+enum DataStorageMethods {
+	File,
+	None
+}
+
+enum SubscriptionMethods {
+	Polling
+}
+
+type Config = {
+	subscription: {
+		method: SubscriptionMethods.Polling;
+		/** In minutes */
+		interval: number;
+	}
+	dataStorage: {
+		method: DataStorageMethods.File;
+		file: string;
+	} | {
+		method: DataStorageMethods.None;
+		file?: never;
+	}
+}
+
 type Data = {
 	latestVids: {
 		[key: string]: string | null // Allows however many key val pairs
@@ -23,11 +47,28 @@ class Notifier extends EventEmitter {
 	onError: ((err: Error) => void) | null = null;
 	onDebug: ((log: string) => void) | null = null;
 	onNewVideo: ((vid: Video) => void) | null = null;
-	constructor(newVidCheckInterval: number, dataFileName?: string) {
+	constructor(config: Config);
+	constructor(newVidCheckInterval: number, dataFileName?: string); // For backwards compatibility, remove 2024
+	constructor(config_or_newVidCheckInterval: Config | number, dataFileName?: string) {
 		super();
+		const config: Config = (typeof config_or_newVidCheckInterval === "number") ?
+			{
+				subscription: {
+					method: SubscriptionMethods.Polling,
+					interval: Math.ceil(config_or_newVidCheckInterval / 60)
+				},
+				dataStorage: (dataFileName === undefined) ? {
+					method: DataStorageMethods.None
+				} : {
+					method: DataStorageMethods.File,
+					file: dataFileName
+				}
+			}
+			: config_or_newVidCheckInterval;
+
 		this.on("error", () => { }); // For backwards compatibility, remove 2024  |  So program stays alive when no listener set
-		this.checkInterval = newVidCheckInterval * 1000;
-		this.dataFile = (dataFileName === undefined) ? null : path.resolve(dataFileName);
+		this.checkInterval = config.subscription.interval * 60 * 1000;
+		this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
 	}
 	private emitError(err: any): void {
 		this.emit("error", err); // For backwards compatibility, remove 2024
@@ -220,4 +261,4 @@ class Notifier extends EventEmitter {
 }
 
 export default Notifier; // For backwards compatibility, remove 2024
-export { Notifier, Video }
+export { Notifier, Video, DataStorageMethods, SubscriptionMethods }
