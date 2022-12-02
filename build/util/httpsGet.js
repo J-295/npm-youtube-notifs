@@ -23,13 +23,21 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.HttpError = exports.httpsGet = void 0;
 const https = __importStar(require("node:https"));
-function default_1(url) {
+class HttpError extends Error {
+    constructor(message, status) {
+        super(message);
+        this.status = status !== null && status !== void 0 ? status : null;
+    }
+}
+exports.HttpError = HttpError;
+function httpsGet(url) {
     const urlObj = new URL(url);
     return new Promise((resolve, reject) => {
         const req = https.request(urlObj, (res) => {
             if (res.statusCode !== 200)
-                reject(new Error(`Non-200 status code: ${res.statusCode}`));
+                reject(new HttpError(`Non-200 status code: ${res.statusCode}`, res.statusCode));
             let data = "";
             res.on("data", (chunk) => {
                 data += chunk;
@@ -44,4 +52,4 @@ function default_1(url) {
         req.end();
     });
 }
-exports.default = default_1;
+exports.httpsGet = httpsGet;

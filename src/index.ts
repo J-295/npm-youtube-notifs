@@ -1,7 +1,8 @@
 import EventEmitter from "node:events";
-import { getChannelData, Video } from "./util/getChannelData";
 import fs from "node:fs";
 import path from "node:path";
+import { getChannelData, Video } from "./util/getChannelData";
+import { HttpError } from "./util/httpsGet";
 
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 
@@ -86,8 +87,9 @@ class Notifier extends EventEmitter {
 	private doCheck(): void {
 		this.emitDebug(`\n## DOING CHECK ##`);
 		for (let i = 0; i < this.subscriptions.length; i++) {
-			this.emitDebug(`checking channel ${this.subscriptions[i]}`);
-			getChannelData(this.subscriptions[i])
+			const channelId = this.subscriptions[i];
+			this.emitDebug(`checking channel ${channelId}`);
+			getChannelData(channelId)
 				.then((channel) => {
 					const prevLatestVidId = this.data.latestVids[channel.id];
 					this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
@@ -136,7 +138,12 @@ class Notifier extends EventEmitter {
 					this.data.latestVids[channel.id] = channel.videos[0].id;
 					this.saveData();
 				})
-				.catch((err) => {
+				.catch((err: HttpError) => {
+					if (err.status === 404) {
+						this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
+						this._unsubscribe(channelId);
+						return;
+					}
 					this.emitError(err);
 				});
 		}

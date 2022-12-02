@@ -1,4 +1,4 @@
-import get from "./httpsGet";
+import { httpsGet, HttpError } from "./httpsGet";
 import xml2js from "xml2js";
 
 type Video = {
@@ -32,7 +32,7 @@ type Channel = {
 
 function getChannelData(channelId: string) {
 	return new Promise<Channel>((resolve, reject) => {
-		get(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`)
+		httpsGet(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`)
 			.then((xml) => {
 				xml2js.parseString(xml, (err, parsedXml) => {
 					if (err !== null) reject(err);
@@ -71,7 +71,7 @@ function getChannelData(channelId: string) {
 					resolve(channel);
 				});
 			})
-			.catch((err) => {
+			.catch((err: HttpError) => {
 				reject(err);
 			});
 	});

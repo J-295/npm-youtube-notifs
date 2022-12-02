@@ -5,9 +5,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Notifier = void 0;
 const node_events_1 = __importDefault(require("node:events"));
-const getChannelData_1 = require("./util/getChannelData");
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
+const getChannelData_1 = require("./util/getChannelData");
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 class Notifier extends node_events_1.default {
     constructor(newVidCheckInterval, dataFileName) {
@@ -88,8 +88,9 @@ class Notifier extends node_events_1.default {
     doCheck() {
         this.emitDebug(`\n## DOING CHECK ##`);
         for (let i = 0; i < this.subscriptions.length; i++) {
-            this.emitDebug(`checking channel ${this.subscriptions[i]}`);
-            (0, getChannelData_1.getChannelData)(this.subscriptions[i])
+            const channelId = this.subscriptions[i];
+            this.emitDebug(`checking channel ${channelId}`);
+            (0, getChannelData_1.getChannelData)(channelId)
                 .then((channel) => {
                 const prevLatestVidId = this.data.latestVids[channel.id];
                 this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
@@ -141,6 +142,11 @@ class Notifier extends node_events_1.default {
                 this.saveData();
             })
                 .catch((err) => {
+                if (err.status === 404) {
+                    this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
+                    this._unsubscribe(channelId);
+                    return;
+                }
                 this.emitError(err);
             });
         }

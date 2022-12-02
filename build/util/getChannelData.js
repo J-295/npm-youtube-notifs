@@ -4,11 +4,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChannelData = void 0;
-const httpsGet_1 = __importDefault(require("./httpsGet"));
+const httpsGet_1 = require("./httpsGet");
 const xml2js_1 = __importDefault(require("xml2js"));
 function getChannelData(channelId) {
     return new Promise((resolve, reject) => {
-        (0, httpsGet_1.default)(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`)
+        (0, httpsGet_1.httpsGet)(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`)
             .then((xml) => {
             xml2js_1.default.parseString(xml, (err, parsedXml) => {
                 if (err !== null)
