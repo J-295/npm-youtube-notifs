@@ -97,7 +97,7 @@ class Notifier extends EventEmitter {
 					this.emitError(err);
 					return resolve();
 				}
-				this.emitDebug(`data file read. Got text:  ${txt}\n\n[TEXT END]`);
+				this.emitDebug(`data file read. Got text:  ${txt}EOF`);
 				try {
 					this.data = JSON.parse(txt);
 				} catch (err) {

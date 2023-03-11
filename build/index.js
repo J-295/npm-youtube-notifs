@@ -79,7 +79,7 @@ class Notifier extends node_events_1.default {
                     this.emitError(err);
                     return resolve();
                 }
-                this.emitDebug(`data file read. Got text:  ${txt}\n\n[TEXT END]`);
+                this.emitDebug(`data file read. Got text:  ${txt}EOF`);
                 try {
                     this.data = JSON.parse(txt);
                 }
