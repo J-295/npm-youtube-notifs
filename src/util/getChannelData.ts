@@ -1,6 +1,14 @@
 import { httpsGet, HttpError } from "./httpsGet";
 import xml2js from "xml2js";
 
+type Channel = {
+	title: string,
+	url: string,
+	id: string,
+	released: Date,
+	videos: Array<Video>
+}
+
 type Video = {
 	title: string,
 	url: string,
@@ -14,20 +22,7 @@ type Video = {
 		height: number,
 		url: string
 	},
-	channel: {
-		title: string,
-		url: string,
-		id: string,
-		released: Date
-	}
-}
-
-type Channel = {
-	title: string,
-	url: string,
-	id: string,
-	released: Date,
-	videos: Array<Video>
+	channel: Omit<Channel, "videos">
 }
 
 function getChannelData(channelId: string) {
@@ -59,7 +54,7 @@ function getChannelData(channelId: string) {
 								height: parseInt(entry["media:group"][0]["media:thumbnail"][0].$.height),
 								url: entry["media:group"][0]["media:thumbnail"][0].$.url
 							},
-							channel: { // TODO: try make circular excluding 'videos' property
+							channel: {
 								title: channel.title,
 								url: channel.title,
 								id: channel.id,

@@ -237,7 +237,7 @@ class Notifier {
 		}
 	}
 	simulateNewVideo(properties?: Partial<Video>): void {
-		let vid = {
+		let vid: Video = {
 			title: "Video Title",
 			url: "Video URL",
 			id: "Video ID",
