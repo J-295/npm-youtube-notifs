@@ -45,6 +45,7 @@ declare class Notifier extends EventEmitter {
     subscribe(channels: string | Array<string>): void;
     private _unsubscribe;
     unsubscribe(channels: string | Array<string>): void;
+    simulateNewVideo(properties?: Partial<Video>): void;
 }
 export default Notifier;
 export { Notifier, Video, DataStorageMethods, SubscriptionMethods };

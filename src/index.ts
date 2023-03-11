@@ -258,6 +258,30 @@ class Notifier extends EventEmitter {
 			}
 		}
 	}
+	simulateNewVideo(properties?: Partial<Video>): void {
+		let vid = {
+			title: "Video Title",
+			url: "Video URL",
+			id: "Video ID",
+			released: new Date(),
+			description: "Video Description",
+			width: 1,
+			height: 2,
+			thumb: {
+				width: 1,
+				height: 2,
+				url: "Thumbnail URL"
+			},
+			channel: {
+				title: "Channel Title",
+				url: "Channel URL",
+				id: "Channel ID",
+				released: new Date()
+			}
+		}
+		Object.assign(vid, properties);
+		if (this.onNewVideo !== null) this.onNewVideo(vid);
+	}
 }
 
 export default Notifier; // For backwards compatibility, remove 2024
