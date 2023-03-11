@@ -1,5 +1,3 @@
-/// <reference types="node" />
-import EventEmitter from "node:events";
 import { Video } from "./util/getChannelData";
 declare enum DataStorageMethods {
     File = 0,
@@ -22,7 +20,7 @@ declare type Config = {
         file?: never;
     };
 };
-declare class Notifier extends EventEmitter {
+declare class Notifier {
     readonly subscriptions: Array<string>;
     private checkInterval;
     private dataFile;
@@ -32,7 +30,6 @@ declare class Notifier extends EventEmitter {
     onDebug: ((log: string) => void) | null;
     onNewVideo: ((vid: Video) => void) | null;
     constructor(config: Config);
-    constructor(newVidCheckInterval: number, dataFileName?: string);
     private emitError;
     private emitDebug;
     private getData;
@@ -47,5 +44,4 @@ declare class Notifier extends EventEmitter {
     unsubscribe(channels: string | Array<string>): void;
     simulateNewVideo(properties?: Partial<Video>): void;
 }
-export default Notifier;
 export { Notifier, Video, DataStorageMethods, SubscriptionMethods };

@@ -1,4 +1,3 @@
-import EventEmitter from "node:events";
 import fs from "node:fs";
 import path from "node:path";
 import { getChannelData, Video } from "./util/getChannelData";
@@ -36,7 +35,7 @@ type Data = {
 	}
 }
 
-class Notifier extends EventEmitter {
+class Notifier {
 	readonly subscriptions: Array<string> = [];
 	private checkInterval: number; // In milliseconds
 	private dataFile: string | null = null;
@@ -47,31 +46,11 @@ class Notifier extends EventEmitter {
 	onError: ((err: Error) => void) | null = null;
 	onDebug: ((log: string) => void) | null = null;
 	onNewVideo: ((vid: Video) => void) | null = null;
-	constructor(config: Config);
-	constructor(newVidCheckInterval: number, dataFileName?: string); // For backwards compatibility, remove 2024
-	constructor(config_or_newVidCheckInterval: Config | number, dataFileName?: string) {
-		super();
-		const config: Config = (typeof config_or_newVidCheckInterval === "number") ?
-			{
-				subscription: {
-					method: SubscriptionMethods.Polling,
-					interval: Math.ceil(config_or_newVidCheckInterval / 60)
-				},
-				dataStorage: (dataFileName === undefined) ? {
-					method: DataStorageMethods.None
-				} : {
-					method: DataStorageMethods.File,
-					file: dataFileName
-				}
-			}
-			: config_or_newVidCheckInterval;
-
-		this.on("error", () => { }); // For backwards compatibility, remove 2024  |  So program stays alive when no listener set
+	constructor(config: Config) {
 		this.checkInterval = config.subscription.interval * 60 * 1000;
 		this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
 	}
 	private emitError(err: any): void {
-		this.emit("error", err); // For backwards compatibility, remove 2024
 		if (this.onError === null) {
 			throw err;
 		} else {
@@ -171,7 +150,6 @@ class Notifier extends EventEmitter {
 						return;
 					}
 					for (let j = newVids.length - 1; j >= 0; j--) {
-						this.emit("newVid", newVids[j]); // For backwards compatibility, remove 2024
 						if (this.onNewVideo !== null) this.onNewVideo(newVids[j]);
 						this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
 					}
@@ -284,5 +262,4 @@ class Notifier extends EventEmitter {
 	}
 }
 
-export default Notifier; // For backwards compatibility, remove 2024
 export { Notifier, Video, DataStorageMethods, SubscriptionMethods }
