@@ -5,6 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChannelData = void 0;
 const xml2js_1 = __importDefault(require("xml2js"));
+const substituteFetch_1 = require("./substituteFetch");
+if (typeof fetch === "undefined") {
+    // @ts-expect-error
+    globalThis.fetch = substituteFetch_1.substituteFetch;
+    console.log("[youtube-notifs package]: Using fetch substitute. Update Node.js to a version containing fetch to remove this message.");
+}
 function getChannelData(channelId) {
     return new Promise((resolve, reject) => {
         fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {

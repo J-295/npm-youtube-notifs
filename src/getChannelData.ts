@@ -1,4 +1,11 @@
 import xml2js from "xml2js";
+import { substituteFetch } from "./substituteFetch";
+
+if (typeof fetch === "undefined") {
+	// @ts-expect-error
+	globalThis.fetch = substituteFetch;
+	console.log("[youtube-notifs package]: Using fetch substitute. Update Node.js to a version containing fetch to remove this message.");
+}
 
 type Channel = {
 	title: string,
