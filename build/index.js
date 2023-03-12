@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubscriptionMethods = exports.DataStorageMethods = exports.Notifier = void 0;
 const node_fs_1 = __importDefault(require("node:fs"));
 const node_path_1 = __importDefault(require("node:path"));
-const getChannelData_1 = require("./util/getChannelData");
+const getChannelData_1 = require("./getChannelData");
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 var DataStorageMethods;
 (function (DataStorageMethods) {
@@ -99,6 +99,11 @@ class Notifier {
             this.emitDebug(`checking channel ${channelId}`);
             (0, getChannelData_1.getChannelData)(channelId)
                 .then((channel) => {
+                if (channel === null) {
+                    this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
+                    this._unsubscribe(channelId);
+                    return;
+                }
                 const prevLatestVidId = this.data.latestVids[channel.id];
                 this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
                 this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
@@ -148,11 +153,6 @@ class Notifier {
                 this.saveData();
             })
                 .catch((err) => {
-                if (err.status === 404) {
-                    this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
-                    this._unsubscribe(channelId);
-                    return;
-                }
                 this.emitError(err);
             });
         }

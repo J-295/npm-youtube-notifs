@@ -1,11 +1,11 @@
-declare type Channel = {
+type Channel = {
     title: string;
     url: string;
     id: string;
     released: Date;
     videos: Array<Video>;
 };
-declare type Video = {
+type Video = {
     title: string;
     url: string;
     id: string;
@@ -20,5 +20,5 @@ declare type Video = {
     };
     channel: Omit<Channel, "videos">;
 };
-declare function getChannelData(channelId: string): Promise<Channel>;
+declare function getChannelData(channelId: string): Promise<Channel | null>;
 export { getChannelData, Video };

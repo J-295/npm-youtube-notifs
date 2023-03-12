@@ -1,4 +1,4 @@
-import { Video } from "./util/getChannelData";
+import { Video } from "./getChannelData";
 declare enum DataStorageMethods {
     File = 0,
     None = 1
@@ -6,7 +6,7 @@ declare enum DataStorageMethods {
 declare enum SubscriptionMethods {
     Polling = 0
 }
-declare type Config = {
+type Config = {
     subscription: {
         method: SubscriptionMethods.Polling;
         /** In minutes */

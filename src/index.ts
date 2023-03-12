@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { getChannelData, Video } from "./util/getChannelData";
-import { HttpError } from "./util/httpsGet";
+import { getChannelData, Video } from "./getChannelData";
 
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 
@@ -111,6 +110,11 @@ class Notifier {
 			this.emitDebug(`checking channel ${channelId}`);
 			getChannelData(channelId)
 				.then((channel) => {
+					if (channel === null) {
+						this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
+						this._unsubscribe(channelId);
+						return;
+					}
 					const prevLatestVidId = this.data.latestVids[channel.id];
 					this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
 					this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
@@ -157,12 +161,7 @@ class Notifier {
 					this.data.latestVids[channel.id] = channel.videos[0].id;
 					this.saveData();
 				})
-				.catch((err: HttpError) => {
-					if (err.status === 404) {
-						this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
-						this._unsubscribe(channelId);
-						return;
-					}
+				.catch((err: Error) => {
 					this.emitError(err);
 				});
 		}
