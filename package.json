@@ -28,7 +28,8 @@
 	"homepage": "https://github.com/James-Bennett-295/npm-youtube-notifs#readme",
 	"devDependencies": {
 		"@types/node": "^18.11.9",
-		"@types/xml2js": "^0.4.11"
+		"@types/xml2js": "^0.4.11",
+		"typescript": "^4.9.5"
 	},
 	"dependencies": {
 		"xml2js": "^0.4.23"
