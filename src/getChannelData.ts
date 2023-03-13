@@ -2,10 +2,10 @@ import xml2js from "xml2js";
 import { substituteFetch } from "./substituteFetch";
 
 if (typeof fetch === "undefined") {
-	// @ts-expect-error
-	globalThis.fetch = substituteFetch;
 	console.log("[youtube-notifs package]: Using fetch substitute. Update Node.js to a version containing fetch to remove this message.");
 }
+
+const nfetch = (typeof fetch === "undefined") ? substituteFetch : fetch;
 
 type Channel = {
 	title: string,
@@ -34,7 +34,7 @@ type Video = {
 function getChannelData(channelId: string) {
 	return new Promise<Channel | null>((resolve, reject) => {
 
-		fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
+		nfetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
 			cache: "no-cache"
 		})
 			.then((res) => {
