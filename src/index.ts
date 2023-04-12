@@ -35,7 +35,7 @@ type Data = {
 }
 
 class Notifier {
-	readonly subscriptions: Array<string> = [];
+	readonly subscriptions: string[] = [];
 	private checkInterval: number; // In milliseconds
 	private dataFile: string | null = null;
 	private intervalId: NodeJS.Timer | null = null;
@@ -205,7 +205,7 @@ class Notifier {
 		};
 		this.subscriptions.push(channel);
 	}
-	subscribe(channels: string | Array<string>): void {
+	subscribe(channels: string | string[]): void {
 		const argIsString = typeof channels === "string";
 		this.emitDebug(`subscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
 		if (typeof channels === "string") {
@@ -224,7 +224,7 @@ class Notifier {
 		}
 		this.subscriptions.splice(index, 1);
 	}
-	unsubscribe(channels: string | Array<string>): void {
+	unsubscribe(channels: string | string[]): void {
 		const argIsString = typeof channels === "string";
 		this.emitDebug(`unsubscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
 		if (typeof channels === "string") {
