@@ -33,4 +33,4 @@ notifier.start();
 
 A bot for Youtube notifications on Discord using this package can be found [here](https://github.com/James-Bennett-295/youtube_notifications_bot).
 
-Have any issues, questions or suggestions? [Join my Discord server](https://discord.com/invite/dcAwVFj2Pf) or [open a Github issue](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).
+Have any issues, questions, or suggestions? [Join my Discord server](https://discord.com/invite/dcAwVFj2Pf) or [open a Github issue](https://github.com/James-Bennett-295/npm-youtube-notifs/issues/new).
