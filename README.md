@@ -21,7 +21,8 @@ notifier.onNewVideo = (video: Video) => {
 	console.dir(video);
 }
 
-// Takes a string or an array of channel IDs.
+// Takes any amount of channel IDs,
+//   spread syntax can be used to subscribe to an array of channels.
 // There is also an unsubscribe function
 notifier.subscribe("UCr9mtUZ7V3QfzGKleu_3CDw");
 

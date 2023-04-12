@@ -21,7 +21,7 @@ type Config = {
     };
 };
 declare class Notifier {
-    readonly subscriptions: Array<string>;
+    readonly subscriptions: string[];
     private checkInterval;
     private dataFile;
     private intervalId;
@@ -39,9 +39,13 @@ declare class Notifier {
     start(): void;
     stop(): void;
     private _subscribe;
-    subscribe(channels: string | Array<string>): void;
+    subscribe(...channels: string[]): void;
+    /** @deprecated Use spread syntax to subscribe to an array of channels. */
+    subscribe(channels: string[]): void;
     private _unsubscribe;
-    unsubscribe(channels: string | Array<string>): void;
+    unsubscribe(...channels: string[]): void;
+    /** @deprecated Use spread syntax to unsubscribe from an array of channels. */
+    unsubscribe(channels: string[]): void;
     simulateNewVideo(properties?: Partial<Video>): void;
 }
 export { Notifier, Video, DataStorageMethods, SubscriptionMethods };

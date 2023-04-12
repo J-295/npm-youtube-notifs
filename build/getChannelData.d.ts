@@ -3,7 +3,7 @@ type Channel = {
     url: string;
     id: string;
     released: Date;
-    videos: Array<Video>;
+    videos: Video[];
 };
 type Video = {
     title: string;

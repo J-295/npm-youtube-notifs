@@ -205,15 +205,14 @@ class Notifier {
 		};
 		this.subscriptions.push(channel);
 	}
-	subscribe(channels: string | string[]): void {
-		const argIsString = typeof channels === "string";
-		this.emitDebug(`subscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
-		if (typeof channels === "string") {
-			this._subscribe(channels);
-		} else {
-			for (let i = 0; i < channels.length; i++) {
-				this._subscribe(channels[i]);
-			}
+	subscribe(...channels: string[]): void;
+	/** @deprecated Use spread syntax to subscribe to an array of channels. */
+	subscribe(channels: string[]): void;
+	subscribe(...channels: string[] | [string[]]): void {
+		this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
+		const _channels = ((Array.isArray(channels[0])) ? channels[0] : channels) as string[];
+		for (let i = 0; i < _channels.length; i++) {
+			this._subscribe(_channels[i]);
 		}
 	}
 	private _unsubscribe(channel: string): void {
@@ -224,15 +223,14 @@ class Notifier {
 		}
 		this.subscriptions.splice(index, 1);
 	}
-	unsubscribe(channels: string | string[]): void {
-		const argIsString = typeof channels === "string";
-		this.emitDebug(`unsubscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
-		if (typeof channels === "string") {
-			this._unsubscribe(channels);
-		} else {
-			for (let i = 0; i < channels.length; i++) {
-				this._unsubscribe(channels[i]);
-			}
+	unsubscribe(...channels: string[]): void;
+	/** @deprecated Use spread syntax to unsubscribe from an array of channels. */
+	unsubscribe(channels: string[]): void;
+	unsubscribe(...channels: string[] | [string[]]): void {
+		this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
+		const _channels = ((Array.isArray(channels[0])) ? channels[0] : channels) as string[];
+		for (let i = 0; i < _channels.length; i++) {
+			this._unsubscribe(_channels[i]);
 		}
 	}
 	simulateNewVideo(properties?: Partial<Video>): void {

@@ -198,16 +198,11 @@ class Notifier {
         ;
         this.subscriptions.push(channel);
     }
-    subscribe(channels) {
-        const argIsString = typeof channels === "string";
-        this.emitDebug(`subscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
-        if (typeof channels === "string") {
-            this._subscribe(channels);
-        }
-        else {
-            for (let i = 0; i < channels.length; i++) {
-                this._subscribe(channels[i]);
-            }
+    subscribe(...channels) {
+        this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
+        const _channels = ((Array.isArray(channels[0])) ? channels[0] : channels);
+        for (let i = 0; i < _channels.length; i++) {
+            this._subscribe(_channels[i]);
         }
     }
     _unsubscribe(channel) {
@@ -218,16 +213,11 @@ class Notifier {
         }
         this.subscriptions.splice(index, 1);
     }
-    unsubscribe(channels) {
-        const argIsString = typeof channels === "string";
-        this.emitDebug(`unsubscribe() called with ${argIsString ? "" : "non-"}string arg ${argIsString ? channels : JSON.stringify(channels)}`);
-        if (typeof channels === "string") {
-            this._unsubscribe(channels);
-        }
-        else {
-            for (let i = 0; i < channels.length; i++) {
-                this._unsubscribe(channels[i]);
-            }
+    unsubscribe(...channels) {
+        this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
+        const _channels = ((Array.isArray(channels[0])) ? channels[0] : channels);
+        for (let i = 0; i < _channels.length; i++) {
+            this._unsubscribe(_channels[i]);
         }
     }
     simulateNewVideo(properties) {
