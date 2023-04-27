@@ -39,7 +39,7 @@ function getChannelData(channelId: string) {
 		})
 			.then((res) => {
 				if (res.status === 404) return resolve(null);
-				if (!res.ok) reject(new Error("Result not ok"));
+				if (!res.ok) reject(new Error(`Result not ok. Status: ${res.status}`));
 				res.text()
 					.then((xml) => {
 						xml2js.parseString(xml, (err, data) => {
