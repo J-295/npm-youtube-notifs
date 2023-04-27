@@ -103,68 +103,68 @@ class Notifier {
 			});
 		});
 	}
-	private doCheck(): void {
-		this.emitDebug(`\n## DOING CHECK ##`);
+	private async doChecks(): Promise<void> {
+		this.emitDebug(`\n## DOING CHECKS ##`);
 		for (let i = 0; i < this.subscriptions.length; i++) {
-			const channelId = this.subscriptions[i];
-			this.emitDebug(`checking channel ${channelId}`);
-			getChannelData(channelId)
-				.then((channel) => {
-					if (channel === null) {
-						this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
-						this._unsubscribe(channelId);
-						return;
-					}
-					const prevLatestVidId = this.data.latestVids[channel.id];
-					this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
-					this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
-					if (channel.videos.length === 0) {
-						this.data.latestVids[channel.id] = null;
-						return;
-					}
-					if (prevLatestVidId === undefined) {
-						this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
-						this.data.latestVids[channel.id] = channel.videos[0].id;
-						this.saveData();
-						return;
-					}
-					const vidIds = channel.videos.map(v => v.id);
-					this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
-					if (prevLatestVidId !== null) {
-						if (vidIds.includes(prevLatestVidId)) {
-							this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
-						} else {
-							this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
-							this.data.latestVids[channel.id] = channel.videos[0].id;
-							this.saveData();
-							return;
-						}
-					}
-					let newVids = [];
-					for (let j = 0; j < channel.videos.length; j++) {
-						if (channel.videos[j].id === prevLatestVidId) {
-							this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
-							break;
-						}
-						newVids.push(channel.videos[j]);
-						this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
-					}
-					if (newVids.length === 0) {
-						this.emitDebug(`[${channel.id}] no new vids`);
-						return;
-					}
-					for (let j = newVids.length - 1; j >= 0; j--) {
-						if (this.onNewVideo !== null) this.onNewVideo(newVids[j]);
-						this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
-					}
-					this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
+			try {
+				const channelId = this.subscriptions[i];
+				this.emitDebug(`checking channel ${channelId}`);
+				const channel = await getChannelData(channelId);
+				if (channel === null) {
+					this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
+					this._unsubscribe(channelId);
+					continue;
+				}
+				const prevLatestVidId = this.data.latestVids[channel.id];
+				this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
+				this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
+				if (channel.videos.length === 0) {
+					this.data.latestVids[channel.id] = null;
+					console.log(0);;
+					continue;
+					console.log(1);;
+				}
+				if (prevLatestVidId === undefined) {
+					this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
 					this.data.latestVids[channel.id] = channel.videos[0].id;
-					this.saveData();
-				})
-				.catch((err: Error) => {
-					this.emitError(err);
-				});
+					continue;
+				}
+				const vidIds = channel.videos.map(v => v.id);
+				this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
+				if (prevLatestVidId !== null) {
+					if (vidIds.includes(prevLatestVidId)) {
+						this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
+					} else {
+						this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
+						this.data.latestVids[channel.id] = channel.videos[0].id;
+						continue;
+					}
+				}
+				let newVids = [];
+				for (let j = 0; j < channel.videos.length; j++) {
+					if (channel.videos[j].id === prevLatestVidId) {
+						this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
+						break;
+					}
+					newVids.push(channel.videos[j]);
+					this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
+				}
+				if (newVids.length === 0) {
+					this.emitDebug(`[${channel.id}] no new vids`);
+					continue;
+				}
+				for (let j = newVids.length - 1; j >= 0; j--) {
+					if (this.onNewVideo !== null) this.onNewVideo(newVids[j]);
+					this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
+				}
+				this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
+				this.data.latestVids[channel.id] = channel.videos[0].id;
+			} catch (err) {
+				this.emitError(err);
+			}
 		}
+		this.saveData();
+		this.emitDebug(`## CHECKS COMPLETE ##\n`);
 	}
 	isActive(): boolean {
 		return this.intervalId !== null;
@@ -182,10 +182,11 @@ class Notifier {
 		this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
 		this.getData()
 			.then(() => {
-				this.doCheck();
-				this.intervalId = setInterval(() => {
-					this.doCheck();
-				}, this.checkInterval);
+				const loop = async () => {
+					await this.doChecks();
+					setTimeout(this.doChecks, this.checkInterval);
+				}
+				loop();
 			});
 	}
 	stop(): void {

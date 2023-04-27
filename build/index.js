@@ -1,4 +1,13 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -92,70 +101,75 @@ class Notifier {
             });
         });
     }
-    doCheck() {
-        this.emitDebug(`\n## DOING CHECK ##`);
-        for (let i = 0; i < this.subscriptions.length; i++) {
-            const channelId = this.subscriptions[i];
-            this.emitDebug(`checking channel ${channelId}`);
-            (0, getChannelData_1.getChannelData)(channelId)
-                .then((channel) => {
-                if (channel === null) {
-                    this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
-                    this._unsubscribe(channelId);
-                    return;
-                }
-                const prevLatestVidId = this.data.latestVids[channel.id];
-                this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
-                this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
-                if (channel.videos.length === 0) {
-                    this.data.latestVids[channel.id] = null;
-                    return;
-                }
-                if (prevLatestVidId === undefined) {
-                    this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
-                    this.data.latestVids[channel.id] = channel.videos[0].id;
-                    this.saveData();
-                    return;
-                }
-                const vidIds = channel.videos.map(v => v.id);
-                this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
-                if (prevLatestVidId !== null) {
-                    if (vidIds.includes(prevLatestVidId)) {
-                        this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
+    doChecks() {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.emitDebug(`\n## DOING CHECKS ##`);
+            for (let i = 0; i < this.subscriptions.length; i++) {
+                try {
+                    const channelId = this.subscriptions[i];
+                    this.emitDebug(`checking channel ${channelId}`);
+                    const channel = yield (0, getChannelData_1.getChannelData)(channelId);
+                    if (channel === null) {
+                        this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
+                        this._unsubscribe(channelId);
+                        continue;
                     }
-                    else {
-                        this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
+                    const prevLatestVidId = this.data.latestVids[channel.id];
+                    this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
+                    this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
+                    if (channel.videos.length === 0) {
+                        this.data.latestVids[channel.id] = null;
+                        console.log(0);
+                        ;
+                        continue;
+                        console.log(1);
+                        ;
+                    }
+                    if (prevLatestVidId === undefined) {
+                        this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
                         this.data.latestVids[channel.id] = channel.videos[0].id;
-                        this.saveData();
-                        return;
+                        continue;
                     }
-                }
-                let newVids = [];
-                for (let j = 0; j < channel.videos.length; j++) {
-                    if (channel.videos[j].id === prevLatestVidId) {
-                        this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
-                        break;
+                    const vidIds = channel.videos.map(v => v.id);
+                    this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
+                    if (prevLatestVidId !== null) {
+                        if (vidIds.includes(prevLatestVidId)) {
+                            this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
+                        }
+                        else {
+                            this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
+                            this.data.latestVids[channel.id] = channel.videos[0].id;
+                            continue;
+                        }
                     }
-                    newVids.push(channel.videos[j]);
-                    this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
+                    let newVids = [];
+                    for (let j = 0; j < channel.videos.length; j++) {
+                        if (channel.videos[j].id === prevLatestVidId) {
+                            this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
+                            break;
+                        }
+                        newVids.push(channel.videos[j]);
+                        this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
+                    }
+                    if (newVids.length === 0) {
+                        this.emitDebug(`[${channel.id}] no new vids`);
+                        continue;
+                    }
+                    for (let j = newVids.length - 1; j >= 0; j--) {
+                        if (this.onNewVideo !== null)
+                            this.onNewVideo(newVids[j]);
+                        this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
+                    }
+                    this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
+                    this.data.latestVids[channel.id] = channel.videos[0].id;
                 }
-                if (newVids.length === 0) {
-                    this.emitDebug(`[${channel.id}] no new vids`);
-                    return;
+                catch (err) {
+                    this.emitError(err);
                 }
-                for (let j = newVids.length - 1; j >= 0; j--) {
-                    if (this.onNewVideo !== null)
-                        this.onNewVideo(newVids[j]);
-                    this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
-                }
-                this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
-                this.data.latestVids[channel.id] = channel.videos[0].id;
-                this.saveData();
-            })
-                .catch((err) => {
-                this.emitError(err);
-            });
-        }
+            }
+            this.saveData();
+            this.emitDebug(`## CHECKS COMPLETE ##\n`);
+        });
     }
     isActive() {
         return this.intervalId !== null;
@@ -173,10 +187,11 @@ class Notifier {
         this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
         this.getData()
             .then(() => {
-            this.doCheck();
-            this.intervalId = setInterval(() => {
-                this.doCheck();
-            }, this.checkInterval);
+            const loop = () => __awaiter(this, void 0, void 0, function* () {
+                yield this.doChecks();
+                setTimeout(this.doChecks, this.checkInterval);
+            });
+            loop();
         });
     }
     stop() {

@@ -34,7 +34,7 @@ declare class Notifier {
     private emitDebug;
     private getData;
     private saveData;
-    private doCheck;
+    private doChecks;
     isActive(): boolean;
     start(): void;
     stop(): void;
