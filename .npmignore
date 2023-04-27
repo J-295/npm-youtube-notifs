@@ -1,9 +1,9 @@
 # ALSO ADD ITEMS TO .gitignore
 
-node_modules/
-src/
-testData/
-.gitattributes
-package-lock.json
-test.js
-tsconfig.json
+/node_modules/
+/src/
+/testData/
+/.gitattributes
+/package-lock.json
+/test.js
+/tsconfig.json
