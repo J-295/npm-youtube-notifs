@@ -40,12 +40,8 @@ declare class Notifier {
     stop(): void;
     private _subscribe;
     subscribe(...channels: string[]): void;
-    /** @deprecated Use spread syntax to subscribe to an array of channels. */
-    subscribe(channels: string[]): void;
     private _unsubscribe;
     unsubscribe(...channels: string[]): void;
-    /** @deprecated Use spread syntax to unsubscribe from an array of channels. */
-    unsubscribe(channels: string[]): void;
     simulateNewVideo(properties?: Partial<Video>): void;
 }
 export { Notifier, Video, DataStorageMethods, SubscriptionMethods };

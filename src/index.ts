@@ -175,6 +175,10 @@ class Notifier {
 			this.emitError(new Error("start() was ran while the notifier was active."));
 			return;
 		}
+		if (this.checkInterval <= 0) {
+			this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
+			return;
+		}
 		this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
 		this.getData()
 			.then(() => {

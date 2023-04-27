@@ -166,6 +166,10 @@ class Notifier {
             this.emitError(new Error("start() was ran while the notifier was active."));
             return;
         }
+        if (this.checkInterval <= 0) {
+            this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
+            return;
+        }
         this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
         this.getData()
             .then(() => {
@@ -200,9 +204,8 @@ class Notifier {
     }
     subscribe(...channels) {
         this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
-        const _channels = ((Array.isArray(channels[0])) ? channels[0] : channels);
-        for (let i = 0; i < _channels.length; i++) {
-            this._subscribe(_channels[i]);
+        for (let i = 0; i < channels.length; i++) {
+            this._subscribe(channels[i]);
         }
     }
     _unsubscribe(channel) {
@@ -215,9 +218,8 @@ class Notifier {
     }
     unsubscribe(...channels) {
         this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
-        const _channels = ((Array.isArray(channels[0])) ? channels[0] : channels);
-        for (let i = 0; i < _channels.length; i++) {
-            this._unsubscribe(_channels[i]);
+        for (let i = 0; i < channels.length; i++) {
+            this._unsubscribe(channels[i]);
         }
     }
     simulateNewVideo(properties) {
