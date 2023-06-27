@@ -21,13 +21,11 @@ var DataStorageMethods;
 (function (DataStorageMethods) {
     DataStorageMethods[DataStorageMethods["File"] = 0] = "File";
     DataStorageMethods[DataStorageMethods["None"] = 1] = "None";
-})(DataStorageMethods || (DataStorageMethods = {}));
-exports.DataStorageMethods = DataStorageMethods;
+})(DataStorageMethods || (exports.DataStorageMethods = DataStorageMethods = {}));
 var SubscriptionMethods;
 (function (SubscriptionMethods) {
     SubscriptionMethods[SubscriptionMethods["Polling"] = 0] = "Polling";
-})(SubscriptionMethods || (SubscriptionMethods = {}));
-exports.SubscriptionMethods = SubscriptionMethods;
+})(SubscriptionMethods || (exports.SubscriptionMethods = SubscriptionMethods = {}));
 class Notifier {
     constructor(config) {
         this.subscriptions = [];

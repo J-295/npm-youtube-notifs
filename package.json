@@ -27,11 +27,11 @@
 	},
 	"homepage": "https://github.com/James-Bennett-295/npm-youtube-notifs#readme",
 	"devDependencies": {
-		"@types/node": "^18.11.9",
+		"@types/node": "^20.3.2",
 		"@types/xml2js": "^0.4.11",
-		"typescript": "^4.9.5"
+		"typescript": "^5.1.3"
 	},
 	"dependencies": {
-		"xml2js": "^0.5.0"
+		"xml2js": "^0.6.0"
 	}
 }
