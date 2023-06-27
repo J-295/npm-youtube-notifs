@@ -39,70 +39,7 @@ class Notifier {
         this.onError = null;
         this.onDebug = null;
         this.onNewVideo = null;
-        this.checkInterval = config.subscription.interval * 60 * 1000;
-        this.dataFile = (config.dataStorage.file === undefined) ? null : node_path_1.default.resolve(config.dataStorage.file);
-    }
-    emitError(err) {
-        if (this.onError === null) {
-            throw err;
-        }
-        else {
-            this.onError(err);
-        }
-    }
-    emitDebug(log) {
-        if (this.onDebug !== null)
-            this.onDebug(log);
-    }
-    getData() {
-        return new Promise((resolve) => {
-            if (this.dataFile === null) {
-                this.emitDebug(`not getting data as dataFile is null`);
-                return resolve();
-            }
-            if (!node_fs_1.default.existsSync(this.dataFile)) {
-                this.emitDebug(`data file not exists`);
-                return resolve();
-            }
-            this.emitDebug(`reading data file...`);
-            node_fs_1.default.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
-                if (err !== null) {
-                    this.emitError(err);
-                    return resolve();
-                }
-                this.emitDebug(`data file read. Got text:  ${txt}EOF`);
-                try {
-                    this.data = JSON.parse(txt);
-                }
-                catch (err) {
-                    this.emitError(err);
-                }
-                return resolve();
-            });
-        });
-    }
-    saveData() {
-        if (this.dataFile === null) {
-            this.emitDebug(`not saving data as dataFile is null`);
-            return;
-        }
-        this.emitDebug(`saving data`);
-        node_fs_1.default.mkdir(node_path_1.default.dirname(this.dataFile), { recursive: true }, (err) => {
-            if (err !== null) {
-                this.emitError(err);
-                return;
-            }
-            const txt = JSON.stringify(this.data);
-            if (this.dataFile === null)
-                return;
-            node_fs_1.default.writeFile(this.dataFile, txt, (err) => {
-                if (err !== null)
-                    this.emitError(err);
-            });
-        });
-    }
-    doChecks() {
-        return __awaiter(this, void 0, void 0, function* () {
+        this.doChecks = () => __awaiter(this, void 0, void 0, function* () {
             this.emitDebug(`\n## DOING CHECKS ##`);
             for (let i = 0; i < this.subscriptions.length; i++) {
                 try {
@@ -170,6 +107,67 @@ class Notifier {
             this.saveData();
             this.emitDebug(`## CHECKS COMPLETE ##\n`);
         });
+        this.checkInterval = config.subscription.interval * 60 * 1000;
+        this.dataFile = (config.dataStorage.file === undefined) ? null : node_path_1.default.resolve(config.dataStorage.file);
+    }
+    emitError(err) {
+        if (this.onError === null) {
+            throw err;
+        }
+        else {
+            this.onError(err);
+        }
+    }
+    emitDebug(log) {
+        if (this.onDebug !== null)
+            this.onDebug(log);
+    }
+    getData() {
+        return new Promise((resolve) => {
+            if (this.dataFile === null) {
+                this.emitDebug(`not getting data as dataFile is null`);
+                return resolve();
+            }
+            if (!node_fs_1.default.existsSync(this.dataFile)) {
+                this.emitDebug(`data file not exists`);
+                return resolve();
+            }
+            this.emitDebug(`reading data file...`);
+            node_fs_1.default.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
+                if (err !== null) {
+                    this.emitError(err);
+                    return resolve();
+                }
+                this.emitDebug(`data file read. Got text:  ${txt}EOF`);
+                try {
+                    this.data = JSON.parse(txt);
+                }
+                catch (err) {
+                    this.emitError(err);
+                }
+                return resolve();
+            });
+        });
+    }
+    saveData() {
+        if (this.dataFile === null) {
+            this.emitDebug(`not saving data as dataFile is null`);
+            return;
+        }
+        this.emitDebug(`saving data`);
+        node_fs_1.default.mkdir(node_path_1.default.dirname(this.dataFile), { recursive: true }, (err) => {
+            if (err !== null) {
+                this.emitError(err);
+                return;
+            }
+            const txt = JSON.stringify(this.data);
+            if (this.dataFile === null)
+                return;
+            node_fs_1.default.writeFile(this.dataFile, txt, (err) => {
+                if (err !== null)
+                    this.emitError(err);
+            });
+        });
     }
     isActive() {
         return this.intervalId !== null;
@@ -189,7 +187,7 @@ class Notifier {
             .then(() => {
             const loop = () => __awaiter(this, void 0, void 0, function* () {
                 yield this.doChecks();
-                setTimeout(this.doChecks, this.checkInterval);
+                setTimeout(loop, this.checkInterval);
             });
             loop();
         });

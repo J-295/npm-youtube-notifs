@@ -103,7 +103,7 @@ class Notifier {
 			});
 		});
 	}
-	private async doChecks(): Promise<void> {
+	private doChecks = async (): Promise<void> => {
 		this.emitDebug(`\n## DOING CHECKS ##`);
 		for (let i = 0; i < this.subscriptions.length; i++) {
 			try {
@@ -184,7 +184,7 @@ class Notifier {
 			.then(() => {
 				const loop = async () => {
 					await this.doChecks();
-					setTimeout(this.doChecks, this.checkInterval);
+					setTimeout(loop, this.checkInterval);
 				}
 				loop();
 			});
