@@ -30,13 +30,13 @@ type Config = {
 
 type Data = {
 	latestVids: {
-		[key: string]: string | null // Allows however many key val pairs
+		[key: string]: string | null;
 	}
 }
 
 class Notifier {
 	readonly subscriptions: string[] = [];
-	private checkInterval: number; // In milliseconds
+	private checkInterval: number;
 	private dataFile: string | null = null;
 	private intervalId: NodeJS.Timeout | null = null;
 	private data: Data = {
@@ -49,6 +49,7 @@ class Notifier {
 		this.checkInterval = config.subscription.interval * 60 * 1000;
 		this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
 	}
+
 	private emitError(err: any): void {
 		if (this.onError === null) {
 			throw err;
@@ -56,9 +57,11 @@ class Notifier {
 			this.onError(<Error>err);
 		}
 	}
+
 	private emitDebug(log: string): void {
 		if (this.onDebug !== null) this.onDebug(log);
 	}
+
 	private getData(): Promise<void> {
 		return new Promise<void>((resolve) => {
 			if (this.dataFile === null) {
@@ -85,6 +88,7 @@ class Notifier {
 			});
 		});
 	}
+
 	private saveData(): void {
 		if (this.dataFile === null) {
 			this.emitDebug(`not saving data as dataFile is null`);
@@ -103,6 +107,7 @@ class Notifier {
 			});
 		});
 	}
+
 	private doChecks = async (): Promise<void> => {
 		this.emitDebug(`\n## DOING CHECKS ##`);
 		for (let i = 0; i < this.subscriptions.length; i++) {
@@ -164,9 +169,11 @@ class Notifier {
 		this.saveData();
 		this.emitDebug(`## CHECKS COMPLETE ##\n`);
 	}
+
 	isActive(): boolean {
 		return this.intervalId !== null;
 	}
+
 	start = async (): Promise<void> => {
 		this.emitDebug(`start() called`);
 		if (this.isActive()) {
@@ -182,6 +189,7 @@ class Notifier {
 		await this.doChecks();
 		this.intervalId = setInterval(this.doChecks, this.checkInterval);
 	}
+
 	stop(): void {
 		this.emitDebug(`stop() called`);
 		if (!this.isActive()) {
@@ -192,6 +200,7 @@ class Notifier {
 		clearInterval(this.intervalId);
 		this.intervalId = null;
 	}
+
 	private _subscribe(channel: string): void {
 		if (!channelIdPattern.test(channel)) {
 			this.emitError(new Error(`Invalid channel ID inputted: ${channel}`));
@@ -209,6 +218,7 @@ class Notifier {
 			this._subscribe(channels[i]);
 		}
 	}
+
 	private _unsubscribe(channel: string): void {
 		const index = this.subscriptions.indexOf(channel);
 		if (index === -1) {
@@ -223,6 +233,7 @@ class Notifier {
 			this._unsubscribe(channels[i]);
 		}
 	}
+
 	simulateNewVideo(properties?: Partial<Video>): void {
 		let vid: Video = {
 			title: "Video Title",
