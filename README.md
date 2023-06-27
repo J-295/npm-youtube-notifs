@@ -2,7 +2,7 @@ Receive events from youtube video uploads!
 
 **Typescript example**
 ```ts
-import { Notifier, Video, SubscriptionMethods, DataStorageMethods } from "youtube-notifs";
+import { Notifier, SubscriptionMethods, DataStorageMethods } from "youtube-notifs";
 
 const notifier = new Notifier({
 	subscription: {
@@ -17,7 +17,7 @@ const notifier = new Notifier({
 
 notifier.onError = console.error;
 
-notifier.onNewVideo = (video: Video) => {
+notifier.onNewVideo = (video) => {
 	console.dir(video);
 }
 
