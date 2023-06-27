@@ -6,7 +6,6 @@ type SubstituteFetchResponse = {
 	text: () => Promise<string>;
 }
 
-// Used if fetch is not available
 function substituteFetch(url: string, init: any): Promise<SubstituteFetchResponse> {
 	return new Promise((resolve, reject) => {
 
@@ -20,7 +19,7 @@ function substituteFetch(url: string, init: any): Promise<SubstituteFetchRespons
 				resolve({
 					status: res.statusCode,
 					ok: 200 <= res.statusCode && res.statusCode <= 299,
-					text: () => new Promise<string>((resolve) => resolve(txt))
+					text: () => Promise.resolve(txt)
 				});
 			});
 		});

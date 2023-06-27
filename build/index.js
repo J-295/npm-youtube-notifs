@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,13 +31,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SubscriptionMethods = exports.DataStorageMethods = exports.Notifier = void 0;
-const node_fs_1 = __importDefault(require("node:fs"));
-const node_path_1 = __importDefault(require("node:path"));
+const fs = __importStar(require("node:fs"));
+const path = __importStar(require("node:path"));
 const getChannelData_1 = require("./getChannelData");
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
 var DataStorageMethods;
@@ -54,11 +74,7 @@ class Notifier {
                     this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
                     if (channel.videos.length === 0) {
                         this.data.latestVids[channel.id] = null;
-                        console.log(0);
-                        ;
                         continue;
-                        console.log(1);
-                        ;
                     }
                     if (prevLatestVidId === undefined) {
                         this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
@@ -105,8 +121,23 @@ class Notifier {
             this.saveData();
             this.emitDebug(`## CHECKS COMPLETE ##\n`);
         });
+        this.start = () => __awaiter(this, void 0, void 0, function* () {
+            this.emitDebug(`start() called`);
+            if (this.isActive()) {
+                this.emitError(new Error("start() was ran while the notifier was active."));
+                return;
+            }
+            if (this.checkInterval <= 0) {
+                this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
+                return;
+            }
+            this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
+            yield this.getData();
+            yield this.doChecks();
+            this.intervalId = setInterval(this.doChecks, this.checkInterval);
+        });
         this.checkInterval = config.subscription.interval * 60 * 1000;
-        this.dataFile = (config.dataStorage.file === undefined) ? null : node_path_1.default.resolve(config.dataStorage.file);
+        this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
     }
     emitError(err) {
         if (this.onError === null) {
@@ -126,12 +157,12 @@ class Notifier {
                 this.emitDebug(`not getting data as dataFile is null`);
                 return resolve();
             }
-            if (!node_fs_1.default.existsSync(this.dataFile)) {
+            if (!fs.existsSync(this.dataFile)) {
                 this.emitDebug(`data file not exists`);
                 return resolve();
             }
             this.emitDebug(`reading data file...`);
-            node_fs_1.default.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
+            fs.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
                 if (err !== null) {
                     this.emitError(err);
                     return resolve();
@@ -153,7 +184,7 @@ class Notifier {
             return;
         }
         this.emitDebug(`saving data`);
-        node_fs_1.default.mkdir(node_path_1.default.dirname(this.dataFile), { recursive: true }, (err) => {
+        fs.mkdir(path.dirname(this.dataFile), { recursive: true }, (err) => {
             if (err !== null) {
                 this.emitError(err);
                 return;
@@ -161,7 +192,7 @@ class Notifier {
             const txt = JSON.stringify(this.data);
             if (this.dataFile === null)
                 return;
-            node_fs_1.default.writeFile(this.dataFile, txt, (err) => {
+            fs.writeFile(this.dataFile, txt, (err) => {
                 if (err !== null)
                     this.emitError(err);
             });
@@ -169,26 +200,6 @@ class Notifier {
     }
     isActive() {
         return this.intervalId !== null;
-    }
-    start() {
-        this.emitDebug(`start() called`);
-        if (this.isActive()) {
-            this.emitError(new Error("start() was ran while the notifier was active."));
-            return;
-        }
-        if (this.checkInterval <= 0) {
-            this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
-            return;
-        }
-        this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
-        this.getData()
-            .then(() => {
-            const loop = () => __awaiter(this, void 0, void 0, function* () {
-                yield this.doChecks();
-                setTimeout(loop, this.checkInterval);
-            });
-            loop();
-        });
     }
     stop() {
         this.emitDebug(`stop() called`);

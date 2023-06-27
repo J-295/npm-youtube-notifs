@@ -1,5 +1,5 @@
-import fs from "node:fs";
-import path from "node:path";
+import * as fs from "node:fs";
+import * as path from "node:path";
 import { getChannelData, Video } from "./getChannelData";
 
 const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
@@ -38,7 +38,7 @@ class Notifier {
 	readonly subscriptions: string[] = [];
 	private checkInterval: number; // In milliseconds
 	private dataFile: string | null = null;
-	private intervalId: NodeJS.Timer | null = null;
+	private intervalId: NodeJS.Timeout | null = null;
 	private data: Data = {
 		latestVids: {}
 	};
@@ -120,9 +120,7 @@ class Notifier {
 				this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
 				if (channel.videos.length === 0) {
 					this.data.latestVids[channel.id] = null;
-					console.log(0);;
 					continue;
-					console.log(1);;
 				}
 				if (prevLatestVidId === undefined) {
 					this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
@@ -169,7 +167,7 @@ class Notifier {
 	isActive(): boolean {
 		return this.intervalId !== null;
 	}
-	start(): void {
+	start = async (): Promise<void> => {
 		this.emitDebug(`start() called`);
 		if (this.isActive()) {
 			this.emitError(new Error("start() was ran while the notifier was active."));
@@ -180,14 +178,9 @@ class Notifier {
 			return;
 		}
 		this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
-		this.getData()
-			.then(() => {
-				const loop = async () => {
-					await this.doChecks();
-					setTimeout(loop, this.checkInterval);
-				}
-				loop();
-			});
+		await this.getData()
+		await this.doChecks();
+		this.intervalId = setInterval(this.doChecks, this.checkInterval);
 	}
 	stop(): void {
 		this.emitDebug(`stop() called`);

@@ -25,7 +25,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.substituteFetch = void 0;
 const https = __importStar(require("node:https"));
-// Used if fetch is not available
 function substituteFetch(url, init) {
     return new Promise((resolve, reject) => {
         const req = https.request(new URL(url), (res) => {
@@ -39,7 +38,7 @@ function substituteFetch(url, init) {
                 resolve({
                     status: res.statusCode,
                     ok: 200 <= res.statusCode && res.statusCode <= 299,
-                    text: () => new Promise((resolve) => resolve(txt))
+                    text: () => Promise.resolve(txt)
                 });
             });
         });

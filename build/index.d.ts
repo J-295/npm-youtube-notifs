@@ -36,7 +36,7 @@ declare class Notifier {
     private saveData;
     private doChecks;
     isActive(): boolean;
-    start(): void;
+    start: () => Promise<void>;
     stop(): void;
     private _subscribe;
     subscribe(...channels: string[]): void;
