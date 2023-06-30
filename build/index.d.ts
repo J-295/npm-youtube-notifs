@@ -26,7 +26,7 @@ declare class Notifier {
     private dataFile;
     private intervalId;
     private data;
-    onError: ((err: Error) => void) | null;
+    onError: ((err: any) => void) | null;
     onDebug: ((log: string) => void) | null;
     onNewVideo: ((vid: Video) => void) | null;
     constructor(config: Config);

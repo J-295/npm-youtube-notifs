@@ -42,7 +42,7 @@ class Notifier {
 	private data: Data = {
 		latestVids: {}
 	};
-	onError: ((err: Error) => void) | null = null;
+	onError: ((err: any) => void) | null = null;
 	onDebug: ((log: string) => void) | null = null;
 	onNewVideo: ((vid: Video) => void) | null = null;
 	constructor(config: Config) {
@@ -54,7 +54,7 @@ class Notifier {
 		if (this.onError === null) {
 			throw err;
 		} else {
-			this.onError(<Error>err);
+			this.onError(err);
 		}
 	}
 
