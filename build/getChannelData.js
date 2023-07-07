@@ -13,7 +13,7 @@ exports.getChannelData = void 0;
 const xml2js_1 = require("xml2js");
 const substituteFetch_1 = require("./substituteFetch");
 if (typeof fetch !== "function") {
-    console.log("[youtube-notifs package]: Using fetch substitute. Update Node.js to a version containing fetch to remove this message.");
+    console.log("[youtube-notifs package]: Update Node.js to version 18.0.0 or higher to avoid issues in future.");
 }
 const fetchImpl = (typeof fetch === "function") ? fetch : substituteFetch_1.substituteFetch;
 function getChannelData(channelId) {

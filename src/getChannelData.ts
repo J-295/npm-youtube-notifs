@@ -2,7 +2,7 @@ import { parseStringPromise as parseXml } from "xml2js";
 import { substituteFetch } from "./substituteFetch";
 
 if (typeof fetch !== "function") {
-	console.log("[youtube-notifs package]: Using fetch substitute. Update Node.js to a version containing fetch to remove this message.");
+	console.log("[youtube-notifs package]: Update Node.js to version 18.0.0 or higher to avoid issues in future.");
 }
 
 const fetchImpl = (typeof fetch === "function") ? fetch : substituteFetch;
