@@ -29,6 +29,7 @@ declare class Notifier {
     onError: ((err: any) => void) | null;
     onDebug: ((log: string) => void) | null;
     onNewVideo: ((vid: Video) => void) | null;
+    onNewVideos: ((vids: Video[]) => void) | null;
     constructor(config: Config);
     private emitError;
     private emitDebug;

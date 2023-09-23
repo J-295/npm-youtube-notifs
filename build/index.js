@@ -57,6 +57,7 @@ class Notifier {
         this.onError = null;
         this.onDebug = null;
         this.onNewVideo = null;
+        this.onNewVideos = null;
         this.doChecks = () => __awaiter(this, void 0, void 0, function* () {
             this.emitDebug(`\n## DOING CHECKS ##`);
             for (let i = 0; i < this.subscriptions.length; i++) {
@@ -106,6 +107,8 @@ class Notifier {
                         this.emitDebug(`[${channel.id}] no new vids`);
                         continue;
                     }
+                    if (this.onNewVideos !== null)
+                        this.onNewVideos(newVids);
                     for (let j = newVids.length - 1; j >= 0; j--) {
                         if (this.onNewVideo !== null)
                             this.onNewVideo(newVids[j]);
@@ -266,6 +269,8 @@ class Notifier {
             }
         };
         Object.assign(vid, properties);
+        if (this.onNewVideos !== null)
+            this.onNewVideos([vid]);
         if (this.onNewVideo !== null)
             this.onNewVideo(vid);
     }

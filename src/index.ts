@@ -45,6 +45,7 @@ class Notifier {
 	onError: ((err: any) => void) | null = null;
 	onDebug: ((log: string) => void) | null = null;
 	onNewVideo: ((vid: Video) => void) | null = null;
+	onNewVideos: ((vids: Video[]) => void) | null = null;
 	constructor(config: Config) {
 		this.checkInterval = config.subscription.interval * 60 * 1000;
 		this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
@@ -156,6 +157,7 @@ class Notifier {
 					this.emitDebug(`[${channel.id}] no new vids`);
 					continue;
 				}
+				if (this.onNewVideos !== null) this.onNewVideos(newVids);
 				for (let j = newVids.length - 1; j >= 0; j--) {
 					if (this.onNewVideo !== null) this.onNewVideo(newVids[j]);
 					this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
@@ -256,6 +258,7 @@ class Notifier {
 			}
 		}
 		Object.assign(vid, properties);
+		if (this.onNewVideos !== null) this.onNewVideos([vid]);
 		if (this.onNewVideo !== null) this.onNewVideo(vid);
 	}
 }
