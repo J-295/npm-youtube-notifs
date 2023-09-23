@@ -107,13 +107,13 @@ class Notifier {
                         this.emitDebug(`[${channel.id}] no new vids`);
                         continue;
                     }
-                    if (this.onNewVideos !== null)
-                        this.onNewVideos(newVids);
                     for (let j = newVids.length - 1; j >= 0; j--) {
                         if (this.onNewVideo !== null)
                             this.onNewVideo(newVids[j]);
                         this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
                     }
+                    if (this.onNewVideos !== null)
+                        this.onNewVideos(newVids.reverse());
                     this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
                     this.data.latestVids[channel.id] = channel.videos[0].id;
                 }
