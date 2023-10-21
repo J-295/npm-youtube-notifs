@@ -68,7 +68,7 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
 			},
 			channel: {
 				title: channel.title,
-				url: channel.title,
+				url: channel.url,
 				id: channel.id,
 				released: channel.released
 			}

@@ -53,7 +53,7 @@ function getChannelData(channelId) {
                 },
                 channel: {
                     title: channel.title,
-                    url: channel.title,
+                    url: channel.url,
                     id: channel.id,
                     released: channel.released
                 }
