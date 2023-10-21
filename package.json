@@ -1,6 +1,6 @@
 {
 	"name": "youtube-notifs",
-	"version": "4.2.7",
+	"version": "5.0.0",
 	"description": "Receive events from youtube video releases",
 	"main": "./build/index.js",
 	"types": "./build/index.d.ts",
