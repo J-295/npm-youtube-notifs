@@ -239,21 +239,21 @@ class Notifier {
 	simulateNewVideo(properties?: Partial<Video>): void {
 		let vid: Video = {
 			title: "Video Title",
-			url: "Video URL",
-			id: "Video ID",
+			url: "https://www.youtube.com/watch?v=XxXxXxXxXxX",
+			id: "XxXxXxXxXxX",
 			released: new Date(),
 			description: "Video Description",
-			width: 1,
-			height: 2,
+			width: 640,
+			height: 390,
 			thumb: {
-				width: 1,
-				height: 2,
-				url: "Thumbnail URL"
+				width: 480,
+				height: 360,
+				url: "https://iX.ytimg.com/vi/XxXxXxXxXxX/hqdefault.jpg"
 			},
 			channel: {
 				title: "Channel Title",
-				url: "Channel URL",
-				id: "Channel ID",
+				url: "https://www.youtube.com/channel/XXXXXXXXXXXXXXXXXXXXXXXX",
+				id: "XXXXXXXXXXXXXXXXXXXXXXXX",
 				released: new Date()
 			}
 		}
