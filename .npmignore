@@ -2,8 +2,7 @@
 
 /node_modules/
 /src/
-/testData/
 /.gitattributes
 /package-lock.json
-/test.js
+/test.*
 /tsconfig.json

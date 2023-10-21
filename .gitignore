@@ -1,6 +1,5 @@
 # ALSO ADD ITEMS TO .npmignore
 
 /node_modules/
-/testData/
 /package-lock.json
-/test.js
+/test.*
