@@ -1,11 +1,4 @@
 import { parseStringPromise as parseXml } from "xml2js";
-import { substituteFetch } from "./substituteFetch";
-
-if (typeof fetch !== "function") {
-	console.log("[youtube-notifs package]: Update Node.js to version 18.0.0 or higher to avoid issues in future.");
-}
-
-const fetchImpl = (typeof fetch === "function") ? fetch : substituteFetch;
 
 type Channel = {
 	title: string,
@@ -33,7 +26,7 @@ type Video = {
 
 async function getChannelData(channelId: string): Promise<Channel | null> {
 
-	const res = await fetchImpl(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
+	const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
 		cache: "no-cache"
 	});
 	if (res.status === 404) return null;

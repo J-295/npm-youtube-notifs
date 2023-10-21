@@ -11,14 +11,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChannelData = void 0;
 const xml2js_1 = require("xml2js");
-const substituteFetch_1 = require("./substituteFetch");
-if (typeof fetch !== "function") {
-    console.log("[youtube-notifs package]: Update Node.js to version 18.0.0 or higher to avoid issues in future.");
-}
-const fetchImpl = (typeof fetch === "function") ? fetch : substituteFetch_1.substituteFetch;
 function getChannelData(channelId) {
     return __awaiter(this, void 0, void 0, function* () {
-        const res = yield fetchImpl(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
+        const res = yield fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
             cache: "no-cache"
         });
         if (res.status === 404)
