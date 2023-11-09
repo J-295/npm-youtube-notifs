@@ -111,9 +111,8 @@ class Notifier {
 
 	private doChecks = async (): Promise<void> => {
 		this.emitDebug(`\n## DOING CHECKS ##`);
-		for (let i = 0; i < this.subscriptions.length; i++) {
+		for (const channelId of this.subscriptions) {
 			try {
-				const channelId = this.subscriptions[i];
 				this.emitDebug(`checking channel ${channelId}`);
 				const channel = await getChannelData(channelId);
 				if (channel === null) {
@@ -145,21 +144,21 @@ class Notifier {
 					}
 				}
 				let newVids = [];
-				for (let j = 0; j < channel.videos.length; j++) {
-					if (channel.videos[j].id === prevLatestVidId) {
+				for (const video of channel.videos) {
+					if (video.id === prevLatestVidId) {
 						this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
 						break;
 					}
-					newVids.push(channel.videos[j]);
-					this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
+					newVids.push(video);
+					this.emitDebug(`[${channel.id}] pushed vid ${video.id} into newVids`);
 				}
 				if (newVids.length === 0) {
 					this.emitDebug(`[${channel.id}] no new vids`);
 					continue;
 				}
-				for (let j = newVids.length - 1; j >= 0; j--) {
-					if (this.onNewVideo !== null) this.onNewVideo(newVids[j]);
-					this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
+				for (const vid of newVids) {
+					if (this.onNewVideo !== null) this.onNewVideo(vid);
+					this.emitDebug(`[${channel.id}] emitted newVid for ${vid.id}`);
 				}
 				if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
 				this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
@@ -216,8 +215,8 @@ class Notifier {
 	}
 	subscribe(...channels: string[]): void {
 		this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
-		for (let i = 0; i < channels.length; i++) {
-			this._subscribe(channels[i]);
+		for (const channel of channels) {
+			this._subscribe(channel);
 		}
 	}
 
@@ -231,8 +230,8 @@ class Notifier {
 	}
 	unsubscribe(...channels: string[]): void {
 		this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
-		for (let i = 0; i < channels.length; i++) {
-			this._unsubscribe(channels[i]);
+		for (const channel of channels) {
+			this._unsubscribe(channel);
 		}
 	}
 

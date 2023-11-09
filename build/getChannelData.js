@@ -31,8 +31,7 @@ function getChannelData(channelId) {
         };
         if (data.feed.entry === undefined)
             return channel;
-        for (let i = 0; i < data.feed.entry.length; i++) {
-            const entry = data.feed.entry[i];
+        for (const entry of data.feed.entry) {
             channel.videos.push({
                 title: entry.title[0],
                 url: entry.link[0].$.href,

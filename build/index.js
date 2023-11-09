@@ -60,9 +60,8 @@ class Notifier {
         this.onNewVideos = null;
         this.doChecks = () => __awaiter(this, void 0, void 0, function* () {
             this.emitDebug(`\n## DOING CHECKS ##`);
-            for (let i = 0; i < this.subscriptions.length; i++) {
+            for (const channelId of this.subscriptions) {
                 try {
-                    const channelId = this.subscriptions[i];
                     this.emitDebug(`checking channel ${channelId}`);
                     const channel = yield (0, getChannelData_1.getChannelData)(channelId);
                     if (channel === null) {
@@ -95,22 +94,22 @@ class Notifier {
                         }
                     }
                     let newVids = [];
-                    for (let j = 0; j < channel.videos.length; j++) {
-                        if (channel.videos[j].id === prevLatestVidId) {
+                    for (const video of channel.videos) {
+                        if (video.id === prevLatestVidId) {
                             this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
                             break;
                         }
-                        newVids.push(channel.videos[j]);
-                        this.emitDebug(`[${channel.id}] pushed vid ${channel.videos[j].id} into newVids`);
+                        newVids.push(video);
+                        this.emitDebug(`[${channel.id}] pushed vid ${video.id} into newVids`);
                     }
                     if (newVids.length === 0) {
                         this.emitDebug(`[${channel.id}] no new vids`);
                         continue;
                     }
-                    for (let j = newVids.length - 1; j >= 0; j--) {
+                    for (const vid of newVids) {
                         if (this.onNewVideo !== null)
-                            this.onNewVideo(newVids[j]);
-                        this.emitDebug(`[${channel.id}] emitted newVid for ${newVids[j].id}`);
+                            this.onNewVideo(vid);
+                        this.emitDebug(`[${channel.id}] emitted newVid for ${vid.id}`);
                     }
                     if (this.onNewVideos !== null)
                         this.onNewVideos(newVids.reverse());
@@ -229,8 +228,8 @@ class Notifier {
     }
     subscribe(...channels) {
         this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
-        for (let i = 0; i < channels.length; i++) {
-            this._subscribe(channels[i]);
+        for (const channel of channels) {
+            this._subscribe(channel);
         }
     }
     _unsubscribe(channel) {
@@ -243,8 +242,8 @@ class Notifier {
     }
     unsubscribe(...channels) {
         this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
-        for (let i = 0; i < channels.length; i++) {
-            this._unsubscribe(channels[i]);
+        for (const channel of channels) {
+            this._unsubscribe(channel);
         }
     }
     simulateNewVideo(properties) {
