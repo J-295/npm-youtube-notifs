@@ -95,9 +95,8 @@ class PollingNotifier {
             try {
                 const channel = await getChannelData(channelId);
                 if (channel === null) {
-                    this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
                     this._unsubscribe(channelId);
-                    continue;
+                    throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
                 }
                 const prevLatestVidId = this.data.latestVids[channel.id];
                 if (channel.videos.length === 0) {
