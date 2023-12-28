@@ -3,15 +3,9 @@ declare enum DataStorageMethods {
     File = 0,
     None = 1
 }
-declare enum SubscriptionMethods {
-    Polling = 0
-}
-type Config = {
-    subscription: {
-        method: SubscriptionMethods.Polling;
-        /** In minutes */
-        interval: number;
-    };
+type PollingNotifierConfig = {
+    /** In minutes */
+    interval: number;
     dataStorage: {
         method: DataStorageMethods.File;
         file: string;
@@ -20,7 +14,7 @@ type Config = {
         file?: never;
     };
 };
-declare class Notifier {
+declare class PollingNotifier {
     readonly subscriptions: string[];
     private checkInterval;
     private dataFile;
@@ -30,7 +24,7 @@ declare class Notifier {
     onDebug: ((log: string) => void) | null;
     onNewVideo: ((vid: Video) => void) | null;
     onNewVideos: ((vids: Video[]) => void) | null;
-    constructor(config: Config);
+    constructor(config: PollingNotifierConfig);
     private emitError;
     private emitDebug;
     private getData;
@@ -45,4 +39,4 @@ declare class Notifier {
     unsubscribe(...channels: string[]): void;
     simulateNewVideo(properties?: Partial<Video>): void;
 }
-export { Notifier, Video, DataStorageMethods, SubscriptionMethods };
+export { PollingNotifier, Video, DataStorageMethods };

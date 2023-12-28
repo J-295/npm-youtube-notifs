@@ -22,7 +22,7 @@ function getChannelData(channelId) {
             throw new Error(`Result not ok. Status: ${res.status}`);
         const xml = yield res.text();
         const data = yield (0, xml2js_1.parseStringPromise)(xml);
-        let channel = {
+        const channel = {
             title: data.feed.title[0],
             url: data.feed.link[1].$.href,
             id: channelId,

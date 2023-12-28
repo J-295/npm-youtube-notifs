@@ -32,21 +32,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.SubscriptionMethods = exports.DataStorageMethods = exports.Notifier = void 0;
+exports.DataStorageMethods = exports.PollingNotifier = void 0;
 const fs = __importStar(require("node:fs"));
 const path = __importStar(require("node:path"));
 const getChannelData_1 = require("./getChannelData");
-const channelIdPattern = /^[0-9a-zA-Z_\-]{24}$/;
+const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
 var DataStorageMethods;
 (function (DataStorageMethods) {
     DataStorageMethods[DataStorageMethods["File"] = 0] = "File";
     DataStorageMethods[DataStorageMethods["None"] = 1] = "None";
 })(DataStorageMethods || (exports.DataStorageMethods = DataStorageMethods = {}));
-var SubscriptionMethods;
-(function (SubscriptionMethods) {
-    SubscriptionMethods[SubscriptionMethods["Polling"] = 0] = "Polling";
-})(SubscriptionMethods || (exports.SubscriptionMethods = SubscriptionMethods = {}));
-class Notifier {
+class PollingNotifier {
     constructor(config) {
         this.subscriptions = [];
         this.dataFile = null;
@@ -59,7 +55,7 @@ class Notifier {
         this.onNewVideo = null;
         this.onNewVideos = null;
         this.doChecks = () => __awaiter(this, void 0, void 0, function* () {
-            this.emitDebug(`\n## DOING CHECKS ##`);
+            this.emitDebug("\n## DOING CHECKS ##");
             for (const channelId of this.subscriptions) {
                 try {
                     this.emitDebug(`checking channel ${channelId}`);
@@ -81,7 +77,7 @@ class Notifier {
                         this.data.latestVids[channel.id] = channel.videos[0].id;
                         continue;
                     }
-                    const vidIds = channel.videos.map(v => v.id);
+                    const vidIds = channel.videos.map((v) => v.id);
                     this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
                     if (prevLatestVidId !== null) {
                         if (vidIds.includes(prevLatestVidId)) {
@@ -93,7 +89,7 @@ class Notifier {
                             continue;
                         }
                     }
-                    let newVids = [];
+                    const newVids = [];
                     for (const video of channel.videos) {
                         if (video.id === prevLatestVidId) {
                             this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
@@ -121,10 +117,10 @@ class Notifier {
                 }
             }
             this.saveData();
-            this.emitDebug(`## CHECKS COMPLETE ##\n`);
+            this.emitDebug("## CHECKS COMPLETE ##\n");
         });
         this.start = () => __awaiter(this, void 0, void 0, function* () {
-            this.emitDebug(`start() called`);
+            this.emitDebug("start() called");
             if (this.isActive()) {
                 this.emitError(new Error("start() was ran while the notifier was active."));
                 return;
@@ -138,7 +134,7 @@ class Notifier {
             yield this.doChecks();
             this.intervalId = setInterval(this.doChecks, this.checkInterval);
         });
-        this.checkInterval = config.subscription.interval * 60 * 1000;
+        this.checkInterval = config.interval * 60 * 1000;
         this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
     }
     emitError(err) {
@@ -156,14 +152,14 @@ class Notifier {
     getData() {
         return new Promise((resolve) => {
             if (this.dataFile === null) {
-                this.emitDebug(`not getting data as dataFile is null`);
+                this.emitDebug("not getting data as dataFile is null");
                 return resolve();
             }
             if (!fs.existsSync(this.dataFile)) {
-                this.emitDebug(`data file not exists`);
+                this.emitDebug("data file not exists");
                 return resolve();
             }
-            this.emitDebug(`reading data file...`);
+            this.emitDebug("reading data file...");
             fs.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
                 if (err !== null) {
                     this.emitError(err);
@@ -182,10 +178,10 @@ class Notifier {
     }
     saveData() {
         if (this.dataFile === null) {
-            this.emitDebug(`not saving data as dataFile is null`);
+            this.emitDebug("not saving data as dataFile is null");
             return;
         }
-        this.emitDebug(`saving data`);
+        this.emitDebug("saving data");
         fs.mkdir(path.dirname(this.dataFile), { recursive: true }, (err) => {
             if (err !== null) {
                 this.emitError(err);
@@ -204,7 +200,7 @@ class Notifier {
         return this.intervalId !== null;
     }
     stop() {
-        this.emitDebug(`stop() called`);
+        this.emitDebug("stop() called");
         if (!this.isActive()) {
             this.emitError(new Error("stop() was ran while the notifier was not active."));
             return;
@@ -223,7 +219,6 @@ class Notifier {
             this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
             return;
         }
-        ;
         this.subscriptions.push(channel);
     }
     subscribe(...channels) {
@@ -247,7 +242,7 @@ class Notifier {
         }
     }
     simulateNewVideo(properties) {
-        let vid = {
+        const vid = {
             title: "Video Title",
             url: "https://www.youtube.com/watch?v=XxXxXxXxXxX",
             id: "XxXxXxXxXxX",
@@ -274,4 +269,4 @@ class Notifier {
             this.onNewVideo(vid);
     }
 }
-exports.Notifier = Notifier;
+exports.PollingNotifier = PollingNotifier;
