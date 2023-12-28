@@ -36,7 +36,6 @@ class PollingNotifier {
         latestVids: {}
     };
     onError: ((err: any) => void) | null = null;
-    onDebug: ((log: string) => void) | null = null;
     onNewVideos: ((vids: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
         this.checkInterval = config.interval * 60 * 1000;
@@ -51,27 +50,19 @@ class PollingNotifier {
         }
     }
 
-    private emitDebug(log: string): void {
-        if (this.onDebug !== null) this.onDebug(log);
-    }
-
     private getData(): Promise<void> {
         return new Promise<void>((resolve) => {
             if (this.dataFile === null) {
-                this.emitDebug("not getting data as dataFile is null");
                 return resolve();
             }
             if (!fs.existsSync(this.dataFile)) {
-                this.emitDebug("data file not exists");
                 return resolve();
             }
-            this.emitDebug("reading data file...");
             fs.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
                 if (err !== null) {
                     this.emitError(err);
                     return resolve();
                 }
-                this.emitDebug(`data file read. Got text:  ${txt}EOF`);
                 try {
                     this.data = JSON.parse(txt);
                 } catch (err) {
@@ -84,10 +75,8 @@ class PollingNotifier {
 
     private saveData(): void {
         if (this.dataFile === null) {
-            this.emitDebug("not saving data as dataFile is null");
             return;
         }
-        this.emitDebug("saving data");
         fs.mkdir(path.dirname(this.dataFile), { recursive: true }, (err) => {
             if (err !== null) {
                 this.emitError(err);
@@ -102,10 +91,8 @@ class PollingNotifier {
     }
 
     private doChecks = async (): Promise<void> => {
-        this.emitDebug("\n## DOING CHECKS ##");
         for (const channelId of this.subscriptions) {
             try {
-                this.emitDebug(`checking channel ${channelId}`);
                 const channel = await getChannelData(channelId);
                 if (channel === null) {
                     this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
@@ -113,50 +100,36 @@ class PollingNotifier {
                     continue;
                 }
                 const prevLatestVidId = this.data.latestVids[channel.id];
-                this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
-                this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
                 if (channel.videos.length === 0) {
                     this.data.latestVids[channel.id] = null;
                     continue;
                 }
                 if (prevLatestVidId === undefined) {
-                    this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
                     this.data.latestVids[channel.id] = channel.videos[0].id;
                     continue;
                 }
                 const vidIds = channel.videos.map((v) => v.id);
-                this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
-                if (prevLatestVidId !== null) {
-                    if (vidIds.includes(prevLatestVidId)) {
-                        this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
-                    } else {
-                        this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
-                        this.data.latestVids[channel.id] = channel.videos[0].id;
-                        continue;
-                    }
+                if (prevLatestVidId !== null && !vidIds.includes(prevLatestVidId)) {
+                    this.data.latestVids[channel.id] = channel.videos[0].id;
+                    continue;
                 }
                 const newVids = [];
                 for (const video of channel.videos) {
                     if (video.id === prevLatestVidId) {
-                        this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
                         break;
                     }
                     newVids.push(video);
-                    this.emitDebug(`[${channel.id}] pushed vid ${video.id} into newVids`);
                 }
                 if (newVids.length === 0) {
-                    this.emitDebug(`[${channel.id}] no new vids`);
                     continue;
                 }
                 if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
-                this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
                 this.data.latestVids[channel.id] = channel.videos[0].id;
             } catch (err) {
                 this.emitError(err);
             }
         }
         this.saveData();
-        this.emitDebug("## CHECKS COMPLETE ##\n");
     };
 
     isActive(): boolean {
@@ -164,7 +137,6 @@ class PollingNotifier {
     }
 
     start = async (): Promise<void> => {
-        this.emitDebug("start() called");
         if (this.isActive()) {
             this.emitError(new Error("start() was ran while the notifier was active."));
             return;
@@ -173,14 +145,12 @@ class PollingNotifier {
             this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
             return;
         }
-        this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
         await this.getData();
         await this.doChecks();
         this.intervalId = setInterval(this.doChecks, this.checkInterval);
     };
 
     stop(): void {
-        this.emitDebug("stop() called");
         if (!this.isActive()) {
             this.emitError(new Error("stop() was ran while the notifier was not active."));
             return;
@@ -202,7 +172,6 @@ class PollingNotifier {
         this.subscriptions.push(channel);
     }
     subscribe(channels: string[]): void {
-        this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
         for (const channel of channels) {
             this._subscribe(channel);
         }
@@ -217,7 +186,6 @@ class PollingNotifier {
         this.subscriptions.splice(index, 1);
     }
     unsubscribe(channels: string[]): void {
-        this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
         for (const channel of channels) {
             this._unsubscribe(channel);
         }
