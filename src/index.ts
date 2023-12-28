@@ -37,7 +37,6 @@ class PollingNotifier {
     };
     onError: ((err: any) => void) | null = null;
     onDebug: ((log: string) => void) | null = null;
-    onNewVideo: ((vid: Video) => void) | null = null;
     onNewVideos: ((vids: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
         this.checkInterval = config.interval * 60 * 1000;
@@ -149,10 +148,6 @@ class PollingNotifier {
                     this.emitDebug(`[${channel.id}] no new vids`);
                     continue;
                 }
-                for (const vid of newVids) {
-                    if (this.onNewVideo !== null) this.onNewVideo(vid);
-                    this.emitDebug(`[${channel.id}] emitted newVid for ${vid.id}`);
-                }
                 if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
                 this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
                 this.data.latestVids[channel.id] = channel.videos[0].id;
@@ -251,7 +246,6 @@ class PollingNotifier {
         };
         Object.assign(vid, properties);
         if (this.onNewVideos !== null) this.onNewVideos([vid]);
-        if (this.onNewVideo !== null) this.onNewVideo(vid);
     }
 }
 
