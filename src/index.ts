@@ -9,16 +9,9 @@ enum DataStorageMethods {
     None
 }
 
-enum SubscriptionMethods {
-    Polling
-}
-
-type Config = {
-    subscription: {
-        method: SubscriptionMethods.Polling;
-        /** In minutes */
-        interval: number;
-    }
+type PollingNotifierConfig = {
+    /** In minutes */
+    interval: number;
     dataStorage: {
         method: DataStorageMethods.File;
         file: string;
@@ -34,7 +27,7 @@ type Data = {
     }
 }
 
-class Notifier {
+class PollingNotifier {
     readonly subscriptions: string[] = [];
     private checkInterval: number;
     private dataFile: string | null = null;
@@ -46,8 +39,8 @@ class Notifier {
     onDebug: ((log: string) => void) | null = null;
     onNewVideo: ((vid: Video) => void) | null = null;
     onNewVideos: ((vids: Video[]) => void) | null = null;
-    constructor(config: Config) {
-        this.checkInterval = config.subscription.interval * 60 * 1000;
+    constructor(config: PollingNotifierConfig) {
+        this.checkInterval = config.interval * 60 * 1000;
         this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
     }
 
@@ -262,4 +255,4 @@ class Notifier {
     }
 }
 
-export { Notifier, Video, DataStorageMethods, SubscriptionMethods };
+export { PollingNotifier, Video, DataStorageMethods };
