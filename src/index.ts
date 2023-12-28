@@ -201,7 +201,7 @@ class PollingNotifier {
         }
         this.subscriptions.push(channel);
     }
-    subscribe(...channels: string[]): void {
+    subscribe(channels: string[]): void {
         this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
         for (const channel of channels) {
             this._subscribe(channel);
@@ -216,7 +216,7 @@ class PollingNotifier {
         }
         this.subscriptions.splice(index, 1);
     }
-    unsubscribe(...channels: string[]): void {
+    unsubscribe(channels: string[]): void {
         this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
         for (const channel of channels) {
             this._unsubscribe(channel);
