@@ -35,7 +35,8 @@
         "no-trailing-spaces": "error",
         "sort-imports": "error",
         "eqeqeq": "error",
-        "arrow-parens": "error"
+        "arrow-parens": "error",
+        "@typescript-eslint/no-explicit-any": "off"
     },
     "ignorePatterns": [
         "/build/**/*",
