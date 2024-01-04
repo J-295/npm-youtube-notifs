@@ -82,7 +82,9 @@ class PollingNotifier {
             return;
         }
         await this.doChecks();
-        this.intervalId = setInterval(this.doChecks, this.checkInterval);
+        this.intervalId = setInterval(() => {
+            this.doChecks();
+        }, this.checkInterval);
     }
 
     stop(): void {

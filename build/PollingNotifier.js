@@ -87,7 +87,9 @@ class PollingNotifier {
                 return;
             }
             yield this.doChecks();
-            this.intervalId = setInterval(this.doChecks, this.checkInterval);
+            this.intervalId = setInterval(() => {
+                this.doChecks();
+            }, this.checkInterval);
         });
     }
     stop() {
