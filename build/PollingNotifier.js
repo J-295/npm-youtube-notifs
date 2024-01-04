@@ -74,7 +74,7 @@ class PollingNotifier {
                     this.emitError(err);
                 }
             }
-            this.storage.set(storage_1.Store.LatestVidIds, data);
+            yield this.storage.set(storage_1.Store.LatestVidIds, data);
         });
     }
     isActive() {

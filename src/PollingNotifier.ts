@@ -69,7 +69,7 @@ class PollingNotifier {
                 this.emitError(err);
             }
         }
-        this.storage.set(Store.LatestVidIds, data);
+        await this.storage.set(Store.LatestVidIds, data);
     }
 
     isActive(): boolean {
