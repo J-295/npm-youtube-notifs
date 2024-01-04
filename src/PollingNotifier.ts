@@ -31,7 +31,7 @@ class PollingNotifier {
         }
     }
 
-    private doChecks = async (): Promise<void> => {
+    private async doChecks(): Promise<void> {
         const data = await this.storage.get(Store.LatestVidIds, this.subscriptions);
         for (const channelId of this.subscriptions) {
             try {
@@ -71,20 +71,20 @@ class PollingNotifier {
             }
         }
         this.storage.set(Store.LatestVidIds, data);
-    };
+    }
 
     isActive(): boolean {
         return this.intervalId !== null;
     }
 
-    start = async (): Promise<void> => {
+    async start(): Promise<void> {
         if (this.isActive()) {
             this.emitError(new Error("start() was ran while the notifier was active."));
             return;
         }
         await this.doChecks();
         this.intervalId = setInterval(this.doChecks, this.checkInterval);
-    };
+    }
 
     stop(): void {
         if (!this.isActive()) {

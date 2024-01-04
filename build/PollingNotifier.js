@@ -20,7 +20,21 @@ class PollingNotifier {
         this.intervalId = null;
         this.onError = null;
         this.onNewVideos = null;
-        this.doChecks = () => __awaiter(this, void 0, void 0, function* () {
+        if (config.interval <= 0)
+            throw new Error("interval cannot be zero or less");
+        this.checkInterval = config.interval * 60 * 1000;
+        this.storage = config.storage;
+    }
+    emitError(err) {
+        if (this.onError === null) {
+            throw err;
+        }
+        else {
+            this.onError(err);
+        }
+    }
+    doChecks() {
+        return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.storage.get(storage_1.Store.LatestVidIds, this.subscriptions);
             for (const channelId of this.subscriptions) {
                 try {
@@ -63,7 +77,12 @@ class PollingNotifier {
             }
             this.storage.set(storage_1.Store.LatestVidIds, data);
         });
-        this.start = () => __awaiter(this, void 0, void 0, function* () {
+    }
+    isActive() {
+        return this.intervalId !== null;
+    }
+    start() {
+        return __awaiter(this, void 0, void 0, function* () {
             if (this.isActive()) {
                 this.emitError(new Error("start() was ran while the notifier was active."));
                 return;
@@ -71,21 +90,6 @@ class PollingNotifier {
             yield this.doChecks();
             this.intervalId = setInterval(this.doChecks, this.checkInterval);
         });
-        if (config.interval <= 0)
-            throw new Error("interval cannot be zero or less");
-        this.checkInterval = config.interval * 60 * 1000;
-        this.storage = config.storage;
-    }
-    emitError(err) {
-        if (this.onError === null) {
-            throw err;
-        }
-        else {
-            this.onError(err);
-        }
-    }
-    isActive() {
-        return this.intervalId !== null;
     }
     stop() {
         if (!this.isActive()) {
