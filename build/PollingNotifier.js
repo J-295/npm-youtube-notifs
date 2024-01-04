@@ -105,9 +105,8 @@ class PollingNotifier {
         clearInterval(this.intervalId);
         this.intervalId = null;
     }
-    subscribe(channels) {
-        if (typeof channels === "string")
-            channels = [channels];
+    subscribe(channel_or_channels) {
+        const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             if (!channelIdPattern.test(channel)) {
                 this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
@@ -120,9 +119,8 @@ class PollingNotifier {
             this.subscriptions.push(channel);
         }
     }
-    unsubscribe(channels) {
-        if (typeof channels === "string")
-            channels = [channels];
+    unsubscribe(channel_or_channels) {
+        const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             const index = this.subscriptions.indexOf(channel);
             if (index === -1) {
