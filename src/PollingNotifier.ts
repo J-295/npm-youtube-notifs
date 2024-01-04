@@ -1,4 +1,4 @@
-import { StorageInterface, Store } from "./storage";
+import { KeyValPairs, StorageInterface, Store } from "./storage";
 import { Video, getChannelData } from "./getChannelData";
 
 const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
@@ -32,6 +32,7 @@ class PollingNotifier {
 
     private async doChecks(): Promise<void> {
         const data = await this.storage.get(Store.LatestVidIds, this.subscriptions);
+        const dataChanges: KeyValPairs = {};
         for (const channelId of this.subscriptions) {
             try {
                 const channel = await getChannelData(channelId);
@@ -41,16 +42,16 @@ class PollingNotifier {
                 }
                 const prevLatestVidId = data[channel.id];
                 if (channel.videos.length === 0) {
-                    data[channel.id] = "";
+                    dataChanges[channel.id] = "";
                     continue;
                 }
                 if (prevLatestVidId === null) {
-                    data[channel.id] = channel.videos[0].id;
+                    dataChanges[channel.id] = channel.videos[0].id;
                     continue;
                 }
                 const vidIds = channel.videos.map((v) => v.id);
                 if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
-                    data[channel.id] = channel.videos[0].id;
+                    dataChanges[channel.id] = channel.videos[0].id;
                     continue;
                 }
                 const newVids = [];
@@ -64,12 +65,13 @@ class PollingNotifier {
                     continue;
                 }
                 if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
-                data[channel.id] = channel.videos[0].id;
+                dataChanges[channel.id] = channel.videos[0].id;
             } catch (err) {
                 this.emitError(err);
             }
         }
-        await this.storage.set(Store.LatestVidIds, data);
+        if (Object.keys(dataChanges).length === 0) return;
+        await this.storage.set(Store.LatestVidIds, dataChanges);
     }
 
     isActive(): boolean {

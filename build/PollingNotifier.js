@@ -35,6 +35,7 @@ class PollingNotifier {
     doChecks() {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.storage.get(storage_1.Store.LatestVidIds, this.subscriptions);
+            const dataChanges = {};
             for (const channelId of this.subscriptions) {
                 try {
                     const channel = yield (0, getChannelData_1.getChannelData)(channelId);
@@ -44,16 +45,16 @@ class PollingNotifier {
                     }
                     const prevLatestVidId = data[channel.id];
                     if (channel.videos.length === 0) {
-                        data[channel.id] = "";
+                        dataChanges[channel.id] = "";
                         continue;
                     }
                     if (prevLatestVidId === null) {
-                        data[channel.id] = channel.videos[0].id;
+                        dataChanges[channel.id] = channel.videos[0].id;
                         continue;
                     }
                     const vidIds = channel.videos.map((v) => v.id);
                     if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
-                        data[channel.id] = channel.videos[0].id;
+                        dataChanges[channel.id] = channel.videos[0].id;
                         continue;
                     }
                     const newVids = [];
@@ -68,13 +69,15 @@ class PollingNotifier {
                     }
                     if (this.onNewVideos !== null)
                         this.onNewVideos(newVids.reverse());
-                    data[channel.id] = channel.videos[0].id;
+                    dataChanges[channel.id] = channel.videos[0].id;
                 }
                 catch (err) {
                     this.emitError(err);
                 }
             }
-            yield this.storage.set(storage_1.Store.LatestVidIds, data);
+            if (Object.keys(dataChanges).length === 0)
+                return;
+            yield this.storage.set(storage_1.Store.LatestVidIds, dataChanges);
         });
     }
     isActive() {
