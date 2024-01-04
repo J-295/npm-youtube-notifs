@@ -16,7 +16,6 @@ const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
 class PollingNotifier {
     constructor(config) {
         this.subscriptions = [];
-        this.dataFile = null;
         this.intervalId = null;
         this.onError = null;
         this.onNewVideos = null;

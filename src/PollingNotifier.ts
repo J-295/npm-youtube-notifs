@@ -12,7 +12,6 @@ type PollingNotifierConfig = {
 class PollingNotifier {
     readonly subscriptions: string[] = [];
     private checkInterval: number;
-    private dataFile: string | null = null;
     private intervalId: NodeJS.Timeout | null = null;
     private storage: StorageInterface;
     onError: ((err: any) => void) | null = null;

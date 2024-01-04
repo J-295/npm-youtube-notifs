@@ -8,7 +8,6 @@ type PollingNotifierConfig = {
 declare class PollingNotifier {
     readonly subscriptions: string[];
     private checkInterval;
-    private dataFile;
     private intervalId;
     private storage;
     onError: ((err: any) => void) | null;
