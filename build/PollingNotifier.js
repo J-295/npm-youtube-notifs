@@ -40,7 +40,7 @@ class PollingNotifier {
                 try {
                     const channel = yield (0, getChannelData_1.getChannelData)(channelId);
                     if (channel === null) {
-                        this.unsubscribe([channelId]);
+                        this.unsubscribe(channelId);
                         throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
                     }
                     const prevLatestVidId = data[channel.id];
@@ -106,6 +106,8 @@ class PollingNotifier {
         this.intervalId = null;
     }
     subscribe(channels) {
+        if (typeof channels === "string")
+            channels = [channels];
         for (const channel of channels) {
             if (!channelIdPattern.test(channel)) {
                 this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
@@ -119,6 +121,8 @@ class PollingNotifier {
         }
     }
     unsubscribe(channels) {
+        if (typeof channels === "string")
+            channels = [channels];
         for (const channel of channels) {
             const index = this.subscriptions.indexOf(channel);
             if (index === -1) {
