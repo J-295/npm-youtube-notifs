@@ -1,7 +1,7 @@
 import { KeyValPairs, StorageInterface, Store } from "../storage";
 
 export class DebugStorage extends StorageInterface {
-    private stores = new Map<Store, Map<string, string | null>>();
+    stores = new Map<Store, Map<string, string | null>>();
     get(store: Store, keys: string[]): Promise<KeyValPairs> {
         console.debug(`get: ${store} ${JSON.stringify(keys)}`);
         const pairs: KeyValPairs = {};
