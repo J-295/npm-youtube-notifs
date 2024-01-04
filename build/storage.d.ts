@@ -9,10 +9,4 @@ declare abstract class StorageInterface {
     abstract set(store: Store, pairs: KeyValPairs): Promise<void>;
     abstract del(store: Store, keys: string[]): Promise<void>;
 }
-declare class DebugStorage extends StorageInterface {
-    private stores;
-    get(store: Store, keys: string[]): Promise<KeyValPairs>;
-    set(store: Store, pairs: KeyValPairs): Promise<void>;
-    del(store: Store, keys: string[]): Promise<void>;
-}
-export { Store, KeyValPairs, StorageInterface, DebugStorage };
+export { Store, KeyValPairs, StorageInterface };
