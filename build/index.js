@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -32,95 +9,62 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DataStorageMethods = exports.PollingNotifier = void 0;
-const fs = __importStar(require("node:fs"));
-const path = __importStar(require("node:path"));
+exports.DebugStorage = exports.PollingNotifier = void 0;
+const storage_1 = require("./storage");
+Object.defineProperty(exports, "DebugStorage", { enumerable: true, get: function () { return storage_1.DebugStorage; } });
 const getChannelData_1 = require("./getChannelData");
 const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
-var DataStorageMethods;
-(function (DataStorageMethods) {
-    DataStorageMethods[DataStorageMethods["File"] = 0] = "File";
-    DataStorageMethods[DataStorageMethods["None"] = 1] = "None";
-})(DataStorageMethods || (exports.DataStorageMethods = DataStorageMethods = {}));
 class PollingNotifier {
     constructor(config) {
         this.subscriptions = [];
         this.dataFile = null;
         this.intervalId = null;
-        this.data = {
-            latestVids: {}
-        };
         this.onError = null;
-        this.onDebug = null;
-        this.onNewVideo = null;
         this.onNewVideos = null;
         this.doChecks = () => __awaiter(this, void 0, void 0, function* () {
-            this.emitDebug("\n## DOING CHECKS ##");
+            const data = yield this.storage.get(storage_1.Store.LatestVidIds, this.subscriptions);
             for (const channelId of this.subscriptions) {
                 try {
-                    this.emitDebug(`checking channel ${channelId}`);
                     const channel = yield (0, getChannelData_1.getChannelData)(channelId);
                     if (channel === null) {
-                        this.emitError(new Error(`Unsubscribing from channel as not exists: "${channelId}"`));
                         this._unsubscribe(channelId);
-                        continue;
+                        throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
                     }
-                    const prevLatestVidId = this.data.latestVids[channel.id];
-                    this.emitDebug(`[${channel.id}] prevLatestVidId: ${prevLatestVidId}`);
-                    this.emitDebug(`[${channel.id}] vid count: ${channel.videos.length}`);
+                    const prevLatestVidId = data[channel.id];
                     if (channel.videos.length === 0) {
-                        this.data.latestVids[channel.id] = null;
+                        data[channel.id] = "";
                         continue;
                     }
-                    if (prevLatestVidId === undefined) {
-                        this.emitDebug(`[${channel.id}] setting (first) latest vid to ${channel.videos[0].id}`);
-                        this.data.latestVids[channel.id] = channel.videos[0].id;
+                    if (prevLatestVidId === null) {
+                        data[channel.id] = channel.videos[0].id;
                         continue;
                     }
                     const vidIds = channel.videos.map((v) => v.id);
-                    this.emitDebug(`[${channel.id}] vidIds: ${JSON.stringify(vidIds, null, 2)}`);
-                    if (prevLatestVidId !== null) {
-                        if (vidIds.includes(prevLatestVidId)) {
-                            this.emitDebug(`[${channel.id}] vidIds includes prevLatestVidId`);
-                        }
-                        else {
-                            this.emitDebug(`[${channel.id}] vidIds not includes prevLatestVidId`);
-                            this.data.latestVids[channel.id] = channel.videos[0].id;
-                            continue;
-                        }
+                    if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
+                        data[channel.id] = channel.videos[0].id;
+                        continue;
                     }
                     const newVids = [];
                     for (const video of channel.videos) {
                         if (video.id === prevLatestVidId) {
-                            this.emitDebug(`[${channel.id}] reached prevLatestVidId`);
                             break;
                         }
                         newVids.push(video);
-                        this.emitDebug(`[${channel.id}] pushed vid ${video.id} into newVids`);
                     }
                     if (newVids.length === 0) {
-                        this.emitDebug(`[${channel.id}] no new vids`);
                         continue;
-                    }
-                    for (const vid of newVids) {
-                        if (this.onNewVideo !== null)
-                            this.onNewVideo(vid);
-                        this.emitDebug(`[${channel.id}] emitted newVid for ${vid.id}`);
                     }
                     if (this.onNewVideos !== null)
                         this.onNewVideos(newVids.reverse());
-                    this.emitDebug(`[${channel.id}] setting latest vid to ${channel.videos[0].id}`);
-                    this.data.latestVids[channel.id] = channel.videos[0].id;
+                    data[channel.id] = channel.videos[0].id;
                 }
                 catch (err) {
                     this.emitError(err);
                 }
             }
-            this.saveData();
-            this.emitDebug("## CHECKS COMPLETE ##\n");
+            this.storage.set(storage_1.Store.LatestVidIds, data);
         });
         this.start = () => __awaiter(this, void 0, void 0, function* () {
-            this.emitDebug("start() called");
             if (this.isActive()) {
                 this.emitError(new Error("start() was ran while the notifier was active."));
                 return;
@@ -129,13 +73,11 @@ class PollingNotifier {
                 this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
                 return;
             }
-            this.emitDebug(`checkInterval is ${this.checkInterval}ms, dataFile is "${this.dataFile}"`);
-            yield this.getData();
             yield this.doChecks();
             this.intervalId = setInterval(this.doChecks, this.checkInterval);
         });
         this.checkInterval = config.interval * 60 * 1000;
-        this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
+        this.storage = config.storage;
     }
     emitError(err) {
         if (this.onError === null) {
@@ -145,62 +87,10 @@ class PollingNotifier {
             this.onError(err);
         }
     }
-    emitDebug(log) {
-        if (this.onDebug !== null)
-            this.onDebug(log);
-    }
-    getData() {
-        return new Promise((resolve) => {
-            if (this.dataFile === null) {
-                this.emitDebug("not getting data as dataFile is null");
-                return resolve();
-            }
-            if (!fs.existsSync(this.dataFile)) {
-                this.emitDebug("data file not exists");
-                return resolve();
-            }
-            this.emitDebug("reading data file...");
-            fs.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
-                if (err !== null) {
-                    this.emitError(err);
-                    return resolve();
-                }
-                this.emitDebug(`data file read. Got text:  ${txt}EOF`);
-                try {
-                    this.data = JSON.parse(txt);
-                }
-                catch (err) {
-                    this.emitError(err);
-                }
-                return resolve();
-            });
-        });
-    }
-    saveData() {
-        if (this.dataFile === null) {
-            this.emitDebug("not saving data as dataFile is null");
-            return;
-        }
-        this.emitDebug("saving data");
-        fs.mkdir(path.dirname(this.dataFile), { recursive: true }, (err) => {
-            if (err !== null) {
-                this.emitError(err);
-                return;
-            }
-            const txt = JSON.stringify(this.data);
-            if (this.dataFile === null)
-                return;
-            fs.writeFile(this.dataFile, txt, (err) => {
-                if (err !== null)
-                    this.emitError(err);
-            });
-        });
-    }
     isActive() {
         return this.intervalId !== null;
     }
     stop() {
-        this.emitDebug("stop() called");
         if (!this.isActive()) {
             this.emitError(new Error("stop() was ran while the notifier was not active."));
             return;
@@ -221,8 +111,7 @@ class PollingNotifier {
         }
         this.subscriptions.push(channel);
     }
-    subscribe(...channels) {
-        this.emitDebug(`subscribe() called with args ${JSON.stringify(channels)}`);
+    subscribe(channels) {
         for (const channel of channels) {
             this._subscribe(channel);
         }
@@ -235,8 +124,7 @@ class PollingNotifier {
         }
         this.subscriptions.splice(index, 1);
     }
-    unsubscribe(...channels) {
-        this.emitDebug(`unsubscribe() called with args ${JSON.stringify(channels)}`);
+    unsubscribe(channels) {
         for (const channel of channels) {
             this._unsubscribe(channel);
         }
@@ -265,8 +153,6 @@ class PollingNotifier {
         Object.assign(vid, properties);
         if (this.onNewVideos !== null)
             this.onNewVideos([vid]);
-        if (this.onNewVideo !== null)
-            this.onNewVideo(vid);
     }
 }
 exports.PollingNotifier = PollingNotifier;

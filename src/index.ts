@@ -1,30 +1,12 @@
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { DebugStorage, StorageInterface, Store } from "./storage";
 import { Video, getChannelData } from "./getChannelData";
 
 const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
 
-enum DataStorageMethods {
-    File,
-    None
-}
-
 type PollingNotifierConfig = {
     /** In minutes */
     interval: number;
-    dataStorage: {
-        method: DataStorageMethods.File;
-        file: string;
-    } | {
-        method: DataStorageMethods.None;
-        file?: never;
-    }
-}
-
-type Data = {
-    latestVids: {
-        [key: string]: string | null;
-    }
+    storage: StorageInterface;
 }
 
 class PollingNotifier {
@@ -32,14 +14,12 @@ class PollingNotifier {
     private checkInterval: number;
     private dataFile: string | null = null;
     private intervalId: NodeJS.Timeout | null = null;
-    private data: Data = {
-        latestVids: {}
-    };
+    private storage: StorageInterface;
     onError: ((err: any) => void) | null = null;
     onNewVideos: ((vids: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
         this.checkInterval = config.interval * 60 * 1000;
-        this.dataFile = (config.dataStorage.file === undefined) ? null : path.resolve(config.dataStorage.file);
+        this.storage = config.storage;
     }
 
     private emitError(err: any): void {
@@ -50,47 +30,8 @@ class PollingNotifier {
         }
     }
 
-    private getData(): Promise<void> {
-        return new Promise<void>((resolve) => {
-            if (this.dataFile === null) {
-                return resolve();
-            }
-            if (!fs.existsSync(this.dataFile)) {
-                return resolve();
-            }
-            fs.readFile(this.dataFile, { encoding: "utf-8" }, (err, txt) => {
-                if (err !== null) {
-                    this.emitError(err);
-                    return resolve();
-                }
-                try {
-                    this.data = JSON.parse(txt);
-                } catch (err) {
-                    this.emitError(err);
-                }
-                return resolve();
-            });
-        });
-    }
-
-    private saveData(): void {
-        if (this.dataFile === null) {
-            return;
-        }
-        fs.mkdir(path.dirname(this.dataFile), { recursive: true }, (err) => {
-            if (err !== null) {
-                this.emitError(err);
-                return;
-            }
-            const txt = JSON.stringify(this.data);
-            if (this.dataFile === null) return;
-            fs.writeFile(this.dataFile, txt, (err) => {
-                if (err !== null) this.emitError(err);
-            });
-        });
-    }
-
     private doChecks = async (): Promise<void> => {
+        const data = await this.storage.get(Store.LatestVidIds, this.subscriptions);
         for (const channelId of this.subscriptions) {
             try {
                 const channel = await getChannelData(channelId);
@@ -98,18 +39,18 @@ class PollingNotifier {
                     this._unsubscribe(channelId);
                     throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
                 }
-                const prevLatestVidId = this.data.latestVids[channel.id];
+                const prevLatestVidId = data[channel.id];
                 if (channel.videos.length === 0) {
-                    this.data.latestVids[channel.id] = null;
+                    data[channel.id] = "";
                     continue;
                 }
-                if (prevLatestVidId === undefined) {
-                    this.data.latestVids[channel.id] = channel.videos[0].id;
+                if (prevLatestVidId === null) {
+                    data[channel.id] = channel.videos[0].id;
                     continue;
                 }
                 const vidIds = channel.videos.map((v) => v.id);
-                if (prevLatestVidId !== null && !vidIds.includes(prevLatestVidId)) {
-                    this.data.latestVids[channel.id] = channel.videos[0].id;
+                if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
+                    data[channel.id] = channel.videos[0].id;
                     continue;
                 }
                 const newVids = [];
@@ -123,12 +64,12 @@ class PollingNotifier {
                     continue;
                 }
                 if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
-                this.data.latestVids[channel.id] = channel.videos[0].id;
+                data[channel.id] = channel.videos[0].id;
             } catch (err) {
                 this.emitError(err);
             }
         }
-        this.saveData();
+        this.storage.set(Store.LatestVidIds, data);
     };
 
     isActive(): boolean {
@@ -144,7 +85,6 @@ class PollingNotifier {
             this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
             return;
         }
-        await this.getData();
         await this.doChecks();
         this.intervalId = setInterval(this.doChecks, this.checkInterval);
     };
@@ -216,4 +156,4 @@ class PollingNotifier {
     }
 }
 
-export { PollingNotifier, Video, DataStorageMethods };
+export { PollingNotifier, Video, DebugStorage };
