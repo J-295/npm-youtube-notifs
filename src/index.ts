@@ -98,7 +98,7 @@ class PollingNotifier {
 
     private _subscribe(channel: string): void {
         if (!channelIdPattern.test(channel)) {
-            this.emitError(new Error(`Invalid channel ID inputted: ${channel}`));
+            this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
             return;
         }
         if (this.subscriptions.includes(channel)) {
@@ -116,7 +116,7 @@ class PollingNotifier {
     private _unsubscribe(channel: string): void {
         const index = this.subscriptions.indexOf(channel);
         if (index === -1) {
-            this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${channel}`));
+            this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${JSON.stringify(channel)}`));
             return;
         }
         this.subscriptions.splice(index, 1);
