@@ -26,7 +26,7 @@ class PollingNotifier {
                 try {
                     const channel = yield (0, getChannelData_1.getChannelData)(channelId);
                     if (channel === null) {
-                        this._unsubscribe(channelId);
+                        this.unsubscribe([channelId]);
                         throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
                     }
                     const prevLatestVidId = data[channel.id];
@@ -97,33 +97,27 @@ class PollingNotifier {
         clearInterval(this.intervalId);
         this.intervalId = null;
     }
-    _subscribe(channel) {
-        if (!channelIdPattern.test(channel)) {
-            this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
-            return;
-        }
-        if (this.subscriptions.includes(channel)) {
-            this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
-            return;
-        }
-        this.subscriptions.push(channel);
-    }
     subscribe(channels) {
         for (const channel of channels) {
-            this._subscribe(channel);
+            if (!channelIdPattern.test(channel)) {
+                this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
+                return;
+            }
+            if (this.subscriptions.includes(channel)) {
+                this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
+                return;
+            }
+            this.subscriptions.push(channel);
         }
-    }
-    _unsubscribe(channel) {
-        const index = this.subscriptions.indexOf(channel);
-        if (index === -1) {
-            this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${JSON.stringify(channel)}`));
-            return;
-        }
-        this.subscriptions.splice(index, 1);
     }
     unsubscribe(channels) {
         for (const channel of channels) {
-            this._unsubscribe(channel);
+            const index = this.subscriptions.indexOf(channel);
+            if (index === -1) {
+                this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${JSON.stringify(channel)}`));
+                return;
+            }
+            this.subscriptions.splice(index, 1);
         }
     }
     simulateNewVideo(properties) {

@@ -19,9 +19,7 @@ declare class PollingNotifier {
     isActive(): boolean;
     start: () => Promise<void>;
     stop(): void;
-    private _subscribe;
     subscribe(channels: string[]): void;
-    private _unsubscribe;
     unsubscribe(channels: string[]): void;
     simulateNewVideo(properties?: Partial<Video>): void;
 }
