@@ -18,6 +18,7 @@ class PollingNotifier {
     onError: ((err: any) => void) | null = null;
     onNewVideos: ((vids: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
+        if (config.interval <= 0) throw new Error("interval cannot be zero or less");
         this.checkInterval = config.interval * 60 * 1000;
         this.storage = config.storage;
     }
@@ -79,10 +80,6 @@ class PollingNotifier {
     start = async (): Promise<void> => {
         if (this.isActive()) {
             this.emitError(new Error("start() was ran while the notifier was active."));
-            return;
-        }
-        if (this.checkInterval <= 0) {
-            this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
             return;
         }
         await this.doChecks();

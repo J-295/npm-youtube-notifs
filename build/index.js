@@ -69,13 +69,11 @@ class PollingNotifier {
                 this.emitError(new Error("start() was ran while the notifier was active."));
                 return;
             }
-            if (this.checkInterval <= 0) {
-                this.emitError(new Error("checkInterval cannot be less than or equal to zero."));
-                return;
-            }
             yield this.doChecks();
             this.intervalId = setInterval(this.doChecks, this.checkInterval);
         });
+        if (config.interval <= 0)
+            throw new Error("interval cannot be zero or less");
         this.checkInterval = config.interval * 60 * 1000;
         this.storage = config.storage;
     }
