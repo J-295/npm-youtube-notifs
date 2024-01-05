@@ -1,9 +1,11 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MemoryStorage = exports.DebugStorage = exports.PollingNotifier = void 0;
+exports.MemoryStorage = exports.JsonStorage = exports.DebugStorage = exports.PollingNotifier = void 0;
 var PollingNotifier_1 = require("./PollingNotifier");
 Object.defineProperty(exports, "PollingNotifier", { enumerable: true, get: function () { return PollingNotifier_1.PollingNotifier; } });
 var DebugStorage_1 = require("./storage/DebugStorage");
 Object.defineProperty(exports, "DebugStorage", { enumerable: true, get: function () { return DebugStorage_1.DebugStorage; } });
+var JsonStorage_1 = require("./storage/JsonStorage");
+Object.defineProperty(exports, "JsonStorage", { enumerable: true, get: function () { return JsonStorage_1.JsonStorage; } });
 var MemoryStorage_1 = require("./storage/MemoryStorage");
 Object.defineProperty(exports, "MemoryStorage", { enumerable: true, get: function () { return MemoryStorage_1.MemoryStorage; } });
