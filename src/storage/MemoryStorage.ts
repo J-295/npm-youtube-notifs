@@ -2,27 +2,25 @@ import { KeyValPairs, StorageInterface, Store } from "../storage";
 
 export class MemoryStorage extends StorageInterface {
     private stores = new Map<Store, Map<string, string | null>>();
-    get(store: Store, keys: string[]): Promise<KeyValPairs> {
+    async get(store: Store, keys: string[]): Promise<KeyValPairs> {
         const pairs: KeyValPairs = {};
         const map = this.stores.get(store);
         for (const key of keys) {
             pairs[key] = map?.get(key) ?? null;
         }
-        return Promise.resolve(pairs);
+        return pairs;
     }
-    set(store: Store, pairs: KeyValPairs): Promise<void> {
+    async set(store: Store, pairs: KeyValPairs): Promise<void> {
         if (this.stores.get(store) === undefined) this.stores.set(store, new Map());
         const map = this.stores.get(store);
         for (const key of Object.keys(pairs)) {
             map?.set(key, pairs[key]);
         }
-        return Promise.resolve();
     }
-    del(store: Store, keys: string[]): Promise<void> {
+    async del(store: Store, keys: string[]): Promise<void> {
         const map = this.stores.get(store);
         for (const key of keys) {
             map?.delete(key);
         }
-        return Promise.resolve();
     }
 }
