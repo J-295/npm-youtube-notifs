@@ -1,6 +1,6 @@
 Receive events from YouTube video uploads!
 
-**View the documentation [here](https://github.com/James-Bennett-295/npm-youtube-notifs/wiki/Documentation).**
+**View the documentation [here](https://github.com/James-Bennett-295/npm-youtube-notifs/wiki).**
 
 A program for receiving YouTube notifications on Discord using this package can be found [here](https://github.com/James-Bennett-295/youtube-webhook).
 
