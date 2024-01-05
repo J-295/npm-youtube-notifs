@@ -24,7 +24,7 @@ class PollingNotifier {
 
     private emitError(err: any): void {
         if (this.onError === null) {
-            throw err;
+            console.error(err);
         } else {
             this.onError(err);
         }
