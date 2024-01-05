@@ -18,7 +18,12 @@ type Video = {
         height: number;
         url: string;
     };
-    channel: Omit<Channel, "videos">;
+    channel: {
+        title: string;
+        url: string;
+        id: string;
+        released: Date;
+    };
 };
 declare function getChannelData(channelId: string): Promise<Channel | null>;
 export { getChannelData, Video };
