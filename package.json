@@ -2,10 +2,10 @@
 	"name": "youtube-notifs",
 	"version": "5.0.0",
 	"description": "Receive events from youtube video releases",
-	"main": "./dist/index.js",
-	"types": "./dist/index.d.ts",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "rm -rf ./dist/ && npx eslint . && npx tsc"
+		"build": "rm -rf dist/ && npx eslint . && npx tsc"
 	},
 	"repository": {
 		"type": "git",
