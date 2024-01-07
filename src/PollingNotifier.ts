@@ -135,7 +135,7 @@ class PollingNotifier {
             title: "Video Title",
             url: "https://www.youtube.com/watch?v=XxXxXxXxXxX",
             id: "XxXxXxXxXxX",
-            released: new Date(),
+            created: new Date(),
             description: "Video Description",
             width: 640,
             height: 390,
@@ -145,10 +145,10 @@ class PollingNotifier {
                 url: "https://iX.ytimg.com/vi/XxXxXxXxXxX/hqdefault.jpg"
             },
             channel: {
-                title: "Channel Title",
+                name: "Channel Title",
                 url: "https://www.youtube.com/channel/XXXXXXXXXXXXXXXXXXXXXXXX",
                 id: "XXXXXXXXXXXXXXXXXXXXXXXX",
-                released: new Date()
+                created: new Date()
             }
         };
         Object.assign(vid, properties);

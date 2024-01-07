@@ -1,10 +1,10 @@
 import { parseStringPromise as parseXml } from "xml2js";
 
 type Channel = {
-    title: string;
+    name: string;
     url: string;
     id: string;
-    released: Date;
+    created: Date;
     videos: Video[];
 }
 
@@ -12,20 +12,20 @@ type Video = {
     title: string;
     url: string;
     id: string;
-    released: Date;
+    created: Date;
     description: string;
     width: number;
     height: number;
+    channel: {
+        name: string;
+        url: string;
+        id: string;
+        created: Date;
+    };
     thumb: {
         width: number;
         height: number;
         url: string;
-    };
-    channel: {
-        title: string;
-        url: string;
-        id: string;
-        released: Date;
     };
 }
 
@@ -40,10 +40,10 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
     const data = await parseXml(xml);
 
     const channel: Channel = {
-        title: data.feed.title[0],
+        name: data.feed.title[0],
         url: data.feed.link[1].$.href,
         id: channelId,
-        released: new Date(data.feed.published[0]),
+        created: new Date(data.feed.published[0]),
         videos: []
     };
 
@@ -54,7 +54,7 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
             title: entry.title[0],
             url: entry.link[0].$.href,
             id: entry["yt:videoId"][0],
-            released: new Date(entry.published[0]),
+            created: new Date(entry.published[0]),
             description: entry["media:group"][0]["media:description"][0],
             width: parseInt(entry["media:group"][0]["media:content"][0].$.width),
             height: parseInt(entry["media:group"][0]["media:content"][0].$.height),
@@ -64,10 +64,10 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
                 url: entry["media:group"][0]["media:thumbnail"][0].$.url
             },
             channel: {
-                title: channel.title,
+                name: channel.name,
                 url: channel.url,
                 id: channel.id,
-                released: channel.released
+                created: channel.created
             }
         });
     }
