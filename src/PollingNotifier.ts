@@ -78,15 +78,17 @@ class PollingNotifier {
         return this.intervalId !== null;
     }
 
-    async start(): Promise<void> {
+    start(): void {
         if (this.isActive()) {
             this.emitError(new Error("start() was ran while the notifier was active."));
             return;
         }
-        await this.doChecks();
-        this.intervalId = setInterval(() => {
-            this.doChecks();
-        }, this.checkInterval);
+        (async () => {
+            await this.doChecks();
+            this.intervalId = setInterval(() => {
+                this.doChecks();
+            }, this.checkInterval);
+        })();
     }
 
     stop(): void {
