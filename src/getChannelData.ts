@@ -30,7 +30,6 @@ type Video = {
 }
 
 async function getChannelData(channelId: string): Promise<Channel | null> {
-
     const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
         cache: "no-cache"
     });
@@ -73,7 +72,6 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
     }
 
     return channel;
-
 }
 
 export { getChannelData, Video };
