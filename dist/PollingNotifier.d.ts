@@ -16,7 +16,7 @@ declare class PollingNotifier {
     private emitError;
     private doChecks;
     isActive(): boolean;
-    start(): Promise<void>;
+    start(): void;
     stop(): void;
     subscribe(channel: string): void;
     subscribe(channels: string[]): void;

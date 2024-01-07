@@ -84,16 +84,16 @@ class PollingNotifier {
         return this.intervalId !== null;
     }
     start() {
-        return __awaiter(this, void 0, void 0, function* () {
-            if (this.isActive()) {
-                this.emitError(new Error("start() was ran while the notifier was active."));
-                return;
-            }
+        if (this.isActive()) {
+            this.emitError(new Error("start() was ran while the notifier was active."));
+            return;
+        }
+        (() => __awaiter(this, void 0, void 0, function* () {
             yield this.doChecks();
             this.intervalId = setInterval(() => {
                 this.doChecks();
             }, this.checkInterval);
-        });
+        }))();
     }
     stop() {
         if (!this.isActive()) {
