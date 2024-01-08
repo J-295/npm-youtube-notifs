@@ -22,11 +22,11 @@ function getChannelData(channelId) {
             throw new Error(`Result not ok. Status: ${res.status}`);
         const xml = yield res.text();
         const data = yield (0, xml2js_1.parseStringPromise)(xml);
-        let channel = {
-            title: data.feed.title[0],
+        const channel = {
+            name: data.feed.title[0],
             url: data.feed.link[1].$.href,
             id: channelId,
-            released: new Date(data.feed.published[0]),
+            created: new Date(data.feed.published[0]),
             videos: []
         };
         if (data.feed.entry === undefined)
@@ -36,7 +36,7 @@ function getChannelData(channelId) {
                 title: entry.title[0],
                 url: entry.link[0].$.href,
                 id: entry["yt:videoId"][0],
-                released: new Date(entry.published[0]),
+                created: new Date(entry.published[0]),
                 description: entry["media:group"][0]["media:description"][0],
                 width: parseInt(entry["media:group"][0]["media:content"][0].$.width),
                 height: parseInt(entry["media:group"][0]["media:content"][0].$.height),
@@ -46,10 +46,10 @@ function getChannelData(channelId) {
                     url: entry["media:group"][0]["media:thumbnail"][0].$.url
                 },
                 channel: {
-                    title: channel.title,
+                    name: channel.name,
                     url: channel.url,
                     id: channel.id,
-                    released: channel.released
+                    created: channel.created
                 }
             });
         }
