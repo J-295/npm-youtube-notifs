@@ -4,7 +4,7 @@ import path from "node:path";
 
 export class JsonStorage extends StorageInterface {
     private filename: string;
-    private data: { [key: string]: { [key: string]: string | null } };
+    protected data: { [key: string]: { [key: string]: string | null } };
     constructor(filename: string) {
         super();
         this.filename = filename;
