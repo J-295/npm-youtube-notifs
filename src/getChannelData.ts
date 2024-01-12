@@ -39,10 +39,10 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
     const data = await parseXml(xml);
 
     const channel: Channel = {
-        name: data.feed.title[0],
-        url: data.feed.link[1].$.href,
+        name: String(data.feed.title[0]),
+        url: String(data.feed.link[1].$.href),
         id: channelId,
-        created: new Date(data.feed.published[0]),
+        created: new Date(String(data.feed.published[0])),
         videos: []
     };
 
@@ -50,17 +50,17 @@ async function getChannelData(channelId: string): Promise<Channel | null> {
 
     for (const entry of data.feed.entry) {
         channel.videos.push({
-            title: entry.title[0],
-            url: entry.link[0].$.href,
-            id: entry["yt:videoId"][0],
-            created: new Date(entry.published[0]),
-            description: entry["media:group"][0]["media:description"][0],
-            width: parseInt(entry["media:group"][0]["media:content"][0].$.width),
-            height: parseInt(entry["media:group"][0]["media:content"][0].$.height),
+            title: String(entry.title[0]),
+            url: String(entry.link[0].$.href),
+            id: String(entry["yt:videoId"][0]),
+            created: new Date(String(entry.published[0])),
+            description: String(entry["media:group"][0]["media:description"][0]),
+            width: parseInt(String(entry["media:group"][0]["media:content"][0].$.width)),
+            height: parseInt(String(entry["media:group"][0]["media:content"][0].$.height)),
             thumb: {
-                width: parseInt(entry["media:group"][0]["media:thumbnail"][0].$.width),
-                height: parseInt(entry["media:group"][0]["media:thumbnail"][0].$.height),
-                url: entry["media:group"][0]["media:thumbnail"][0].$.url
+                width: parseInt(String(entry["media:group"][0]["media:thumbnail"][0].$.width)),
+                height: parseInt(String(entry["media:group"][0]["media:thumbnail"][0].$.height)),
+                url: String(entry["media:group"][0]["media:thumbnail"][0].$.url)
             },
             channel: {
                 name: channel.name,
