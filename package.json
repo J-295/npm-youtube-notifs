@@ -18,7 +18,8 @@
 		"notifs",
 		"notifier",
 		"subscribe",
-		"watch"
+		"watch",
+		"events"
 	],
 	"author": "James Bennett",
 	"license": "MIT",
