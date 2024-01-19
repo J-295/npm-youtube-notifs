@@ -3,6 +3,7 @@
 /node_modules/
 /src/
 /.gitattributes
+/.eslintrc.json
 /package-lock.json
 /test.*
 /tsconfig.json

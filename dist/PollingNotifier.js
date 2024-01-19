@@ -17,6 +17,7 @@ class PollingNotifier {
     constructor(config) {
         this.subscriptions = [];
         this.intervalId = null;
+        // change `err` type to Error in next release (breaking change)
         this.onError = null;
         this.onNewVideos = null;
         if (config.interval <= 0)
@@ -25,6 +26,11 @@ class PollingNotifier {
         this.storage = config.storage;
     }
     emitError(err) {
+        if (!(err instanceof Error)) {
+            console.error("[youtube-notifs]: ERROR IS NOT OF CORRECT TYPE");
+            console.error(err);
+            return;
+        }
         if (this.onError === null) {
             console.error(err);
         }

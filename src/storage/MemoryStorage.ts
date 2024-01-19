@@ -11,7 +11,7 @@ export class MemoryStorage extends StorageInterface {
         return pairs;
     }
     async set(store: Store, pairs: KeyValPairs): Promise<void> {
-        if (this.stores.get(store) === undefined) this.stores.set(store, new Map());
+        if (!this.stores.has(store)) this.stores.set(store, new Map());
         const map = this.stores.get(store);
         for (const key of Object.keys(pairs)) {
             map?.set(key, pairs[key]);
