@@ -31,7 +31,7 @@ class DebugStorage extends storage_1.StorageInterface {
     set(store, pairs) {
         return __awaiter(this, void 0, void 0, function* () {
             console.debug(`set: ${store} ${JSON.stringify(pairs)}`);
-            if (this.stores.get(store) === undefined)
+            if (!this.stores.has(store))
                 this.stores.set(store, new Map());
             const map = this.stores.get(store);
             for (const key of Object.keys(pairs)) {
