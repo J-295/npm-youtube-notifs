@@ -1,6 +1,6 @@
 export { PollingNotifier } from "./PollingNotifier";
 export { Video } from "./getChannelData";
-export { KeyValPairs, StorageInterface, Store } from "./storage";
+export { StorageInterface, Store } from "./storage";
 
 export { DebugStorage } from "./storage/DebugStorage";
 export { JsonStorage } from "./storage/JsonStorage";

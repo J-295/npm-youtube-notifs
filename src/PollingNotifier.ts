@@ -1,4 +1,4 @@
-import { KeyValPairs, StorageInterface, Store } from "./storage";
+import { StorageInterface, Store } from "./storage";
 import { Video, getChannelData } from "./getChannelData";
 
 const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
@@ -37,7 +37,7 @@ class PollingNotifier {
 
     private async doChecks(): Promise<void> {
         const data = await this.storage.get(Store.LatestVidIds, this.subscriptions);
-        const dataChanges: KeyValPairs = {};
+        const dataChanges: Record<string, string> = {};
         for (const channelId of this.subscriptions) {
             try {
                 const channel = await getChannelData(channelId);

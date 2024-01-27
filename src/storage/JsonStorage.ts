@@ -1,10 +1,10 @@
-import { KeyValPairs, StorageInterface, Store } from "../storage";
+import { StorageInterface, Store } from "../storage";
 import fs from "node:fs";
 import path from "node:path";
 
 export class JsonStorage extends StorageInterface {
     private filename: string;
-    protected data: { [key: string]: { [key: string]: string | null } };
+    protected data: Record<string, Record<string, string>>;
     constructor(filename: string) {
         super();
         this.filename = filename;
@@ -16,14 +16,14 @@ export class JsonStorage extends StorageInterface {
             this.data = {};
         }
     }
-    async get(store: Store, keys: string[]): Promise<KeyValPairs> {
-        const pairs: KeyValPairs = {};
+    async get(store: Store, keys: string[]): Promise<Record<string, string | null>> {
+        const pairs: Record<string, string | null> = {};
         for (const key of keys) {
             pairs[key] = this.data[store]?.[key] ?? null;
         }
         return pairs;
     }
-    async set(store: Store, pairs: KeyValPairs): Promise<void> {
+    async set(store: Store, pairs: Record<string, string>): Promise<void> {
         if (this.data[store] === undefined) this.data[store] = {};
         Object.assign(this.data[store], pairs);
         fs.writeFileSync(this.filename, JSON.stringify(this.data));
