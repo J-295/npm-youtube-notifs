@@ -108,7 +108,7 @@ class PollingNotifier {
 
     subscribe(channel: string): void;
     subscribe(channels: string[]): void;
-    subscribe(channel_or_channels: string[] | string): void {
+    subscribe(channel_or_channels: string | string[]): void {
         const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             if (!channelIdPattern.test(channel)) {
@@ -125,7 +125,7 @@ class PollingNotifier {
 
     unsubscribe(channel: string): void;
     unsubscribe(channels: string[]): void;
-    unsubscribe(channel_or_channels: string[] | string): void {
+    unsubscribe(channel_or_channels: string | string[]): void {
         const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             const index = this.subscriptions.indexOf(channel);
