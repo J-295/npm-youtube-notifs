@@ -113,11 +113,11 @@ class PollingNotifier {
         for (const channel of channels) {
             if (!channelIdPattern.test(channel)) {
                 this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
-                return;
+                continue;
             }
             if (this.subscriptions.includes(channel)) {
                 this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
-                return;
+                continue;
             }
             this.subscriptions.push(channel);
         }
@@ -131,7 +131,7 @@ class PollingNotifier {
             const index = this.subscriptions.indexOf(channel);
             if (index === -1) {
                 this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${JSON.stringify(channel)}`));
-                return;
+                continue;
             }
             this.subscriptions.splice(index, 1);
         }
