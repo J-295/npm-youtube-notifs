@@ -101,8 +101,7 @@ class PollingNotifier {
             this.emitError(new Error("stop() was ran while the notifier was not active."));
             return;
         }
-        if (this.intervalId === null) return;
-        clearInterval(this.intervalId);
+        clearInterval(this.intervalId!);
         this.intervalId = null;
     }
 
