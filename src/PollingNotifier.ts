@@ -1,5 +1,5 @@
 import { StorageInterface, Store } from "./storage";
-import { Video, getChannelData } from "./getChannelData";
+import { Video, getChannelVideos } from "./getChannelVideos";
 
 const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
 
@@ -40,27 +40,27 @@ class PollingNotifier {
         const dataChanges: Record<string, string> = {};
         for (const channelId of this.subscriptions) {
             try {
-                const channel = await getChannelData(channelId);
-                if (channel === null) {
+                const channelVideos = await getChannelVideos(channelId);
+                if (channelVideos === null) {
                     this.unsubscribe(channelId);
                     throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
                 }
-                const prevLatestVidId = data[channel.id];
-                if (channel.videos.length === 0) {
-                    dataChanges[channel.id] = "";
+                const prevLatestVidId = data[channelId];
+                if (channelVideos.length === 0) {
+                    dataChanges[channelId] = "";
                     continue;
                 }
                 if (prevLatestVidId === null) {
-                    dataChanges[channel.id] = channel.videos[0].id;
+                    dataChanges[channelId] = channelVideos[0].id;
                     continue;
                 }
-                const vidIds = channel.videos.map((v) => v.id);
+                const vidIds = channelVideos.map((v) => v.id);
                 if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
-                    dataChanges[channel.id] = channel.videos[0].id;
+                    dataChanges[channelId] = channelVideos[0].id;
                     continue;
                 }
                 const newVids = [];
-                for (const video of channel.videos) {
+                for (const video of channelVideos) {
                     if (video.id === prevLatestVidId) {
                         break;
                     }
@@ -70,7 +70,7 @@ class PollingNotifier {
                     continue;
                 }
                 if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
-                dataChanges[channel.id] = channel.videos[0].id;
+                dataChanges[channelId] = channelVideos[0].id;
             } catch (err) {
                 this.emitError(err);
             }
