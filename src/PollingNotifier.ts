@@ -151,7 +151,7 @@ class PollingNotifier {
                 url: "https://iX.ytimg.com/vi/XxXxXxXxXxX/hqdefault.jpg"
             },
             channel: {
-                name: "Channel Title",
+                name: "Channel Name",
                 url: "https://www.youtube.com/channel/XXXXXXXXXXXXXXXXXXXXXXXX",
                 id: "XXXXXXXXXXXXXXXXXXXXXXXX",
                 created: new Date()
