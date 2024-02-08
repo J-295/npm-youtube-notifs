@@ -17,21 +17,21 @@ class PollingNotifier {
     onError: ((err: Error) => void) | null = null;
     onNewVideos: ((vids: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
-        if (config.interval <= 0) throw new Error("interval cannot be zero or less");
+        if (config.interval <= 0) throw new Error("interval can't be zero or less");
         this.checkInterval = config.interval * 60 * 1000;
         this.storage = config.storage;
     }
 
-    private emitError(err: unknown): void {
-        if (!(err instanceof Error)) {
-            console.error("[youtube-notifs]: ERROR IS NOT OF CORRECT TYPE");
-            console.error(err);
+    private emitError(error: unknown): void {
+        if (!(error instanceof Error)) {
+            console.error("[youtube-notifs]: error is not an instance of Error");
+            console.error(error);
             return;
         }
         if (this.onError === null) {
-            console.error(err);
+            console.error(error);
         } else {
-            this.onError(err);
+            this.onError(error);
         }
     }
 
@@ -43,7 +43,7 @@ class PollingNotifier {
                 const channelVideos = await getChannelVideos(channelId);
                 if (channelVideos === null) {
                     this.unsubscribe(channelId);
-                    throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
+                    throw new Error(`Unsubscribing from channel as it doesn't exist: "${channelId}"`);
                 }
                 const prevLatestVidId = data[channelId];
                 if (channelVideos.length === 0) {
@@ -85,7 +85,7 @@ class PollingNotifier {
 
     start(): void {
         if (this.isActive()) {
-            this.emitError(new Error("start() was ran while the notifier was active."));
+            this.emitError(new Error("start() was ran while the notifier was already active"));
             return;
         }
         (async () => {
@@ -98,7 +98,7 @@ class PollingNotifier {
 
     stop(): void {
         if (!this.isActive()) {
-            this.emitError(new Error("stop() was ran while the notifier was not active."));
+            this.emitError(new Error("stop() was ran while the notifier wasn't active"));
             return;
         }
         clearInterval(this.intervalId!);
@@ -111,11 +111,11 @@ class PollingNotifier {
         const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             if (!channelIdPattern.test(channel)) {
-                this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
+                this.emitError(new Error(`subscribe() was ran with an invalid channel ID: ${JSON.stringify(channel)}`));
                 continue;
             }
             if (this.subscriptions.includes(channel)) {
-                this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
+                this.emitError(new Error(`subscribe() was ran with a channel ID that is already subscribed to: ${channel}`));
                 continue;
             }
             this.subscriptions.push(channel);

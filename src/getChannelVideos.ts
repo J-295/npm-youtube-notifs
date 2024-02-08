@@ -26,7 +26,7 @@ async function getChannelVideos(channelId: string): Promise<Video[] | null> {
         cache: "no-cache"
     });
     if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Result not ok. Status: ${res.status}`);
+    if (!res.ok) throw new Error(`Request failed with HTTP status ${res.status}`);
     const xml = await res.text();
     const data = await parseXml(xml);
 
