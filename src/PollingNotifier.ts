@@ -45,18 +45,18 @@ class PollingNotifier {
                     this.unsubscribe(channelId);
                     throw new Error(`Unsubscribing from channel as it doesn't exist: "${channelId}"`);
                 }
-                const prevLatestVidId = data[channelId];
+                const prevLatestVidId = data[channelId]!;
                 if (channelVideos.length === 0) {
                     dataChanges[channelId] = "";
                     continue;
                 }
                 if (prevLatestVidId === null) {
-                    dataChanges[channelId] = channelVideos[0].id;
+                    dataChanges[channelId] = channelVideos[0]!.id;
                     continue;
                 }
                 const vidIds = channelVideos.map((v) => v.id);
                 if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
-                    dataChanges[channelId] = channelVideos[0].id;
+                    dataChanges[channelId] = channelVideos[0]!.id;
                     continue;
                 }
                 const newVids = [];
@@ -70,7 +70,7 @@ class PollingNotifier {
                     continue;
                 }
                 if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
-                dataChanges[channelId] = channelVideos[0].id;
+                dataChanges[channelId] = channelVideos[0]!.id;
             } catch (err) {
                 this.emitError(err);
             }

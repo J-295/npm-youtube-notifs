@@ -11,11 +11,11 @@ export class MemoryStorage extends StorageInterface {
     }
     async set(store: Store, pairs: Record<string, string>): Promise<void> {
         if (this.data[store] === undefined) this.data[store] = {};
-        Object.assign(this.data[store], pairs);
+        Object.assign(this.data[store]!, pairs);
     }
     async del(store: Store, keys: string[]): Promise<void> {
         for (const key of keys) {
-            if (this.data[store]?.[key] !== undefined) delete this.data[store][key];
+            if (this.data[store]?.[key] !== undefined) delete this.data[store]![key];
         }
     }
 }
