@@ -30,9 +30,8 @@ async function getChannelVideos(channelId: string): Promise<Video[] | null> {
     const xml = await res.text();
     const data = await parseXml(xml);
 
-    if (data.feed.entry === undefined) return [];
-
     const videos: Video[] = [];
+    if (data.feed.entry === undefined) return videos;
     for (const entry of data.feed.entry) {
         videos.push({
             title: String(entry.title[0]),
