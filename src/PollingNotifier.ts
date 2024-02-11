@@ -38,6 +38,7 @@ class PollingNotifier {
     private async doChecks(): Promise<void> {
         const data = await this.storage.get(Store.LatestVidIds, this.subscriptions);
         const dataChanges: Record<string, string> = {};
+        const newVids = [];
         for (const channelId of this.subscriptions) {
             try {
                 const channelVideos = await getChannelVideos(channelId);
@@ -59,21 +60,20 @@ class PollingNotifier {
                     dataChanges[channelId] = channelVideos[0]!.id;
                     continue;
                 }
-                const newVids = [];
                 for (const video of channelVideos) {
                     if (video.id === prevLatestVidId) {
                         break;
                     }
                     newVids.push(video);
                 }
-                if (newVids.length === 0) {
-                    continue;
-                }
-                if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
                 dataChanges[channelId] = channelVideos[0]!.id;
             } catch (err) {
                 this.emitError(err);
             }
+
+            if (newVids.length === 0) continue;
+            newVids.sort((a, b) => a.created.getTime() - b.created.getTime());
+            if (this.onNewVideos !== null) this.onNewVideos(newVids);
         }
         if (Object.keys(dataChanges).length === 0) return;
         await this.storage.set(Store.LatestVidIds, dataChanges);
