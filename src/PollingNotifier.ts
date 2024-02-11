@@ -10,7 +10,7 @@ type PollingNotifierConfig = {
 }
 
 class PollingNotifier {
-    readonly subscriptions: string[] = [];
+    private subscriptions: string[] = [];
     private checkInterval: number;
     private intervalId: NodeJS.Timeout | null = null;
     private storage: StorageInterface;
@@ -134,6 +134,10 @@ class PollingNotifier {
             }
             this.subscriptions.splice(index, 1);
         }
+    }
+
+    getSubscriptions(): string[] {
+        return [...this.subscriptions];
     }
 
     simulateNewVideo(properties?: Partial<Video>): void {
