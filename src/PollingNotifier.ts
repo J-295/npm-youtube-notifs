@@ -14,8 +14,8 @@ class PollingNotifier {
     private checkInterval: number;
     private intervalId: NodeJS.Timeout | null = null;
     private storage: StorageInterface;
-    onError: ((err: Error) => void) | null = null;
-    onNewVideos: ((vids: Video[]) => void) | null = null;
+    onError: ((error: Error) => void) | null = null;
+    onNewVideos: ((videos: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
         if (config.interval <= 0) throw new Error("interval can't be zero or less");
         this.checkInterval = config.interval * 60 * 1000;
