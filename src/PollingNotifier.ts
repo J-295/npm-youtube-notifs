@@ -82,7 +82,6 @@ class PollingNotifier {
     isActive(): boolean {
         return this.intervalId !== null;
     }
-
     start(): void {
         if (this.isActive()) {
             this.emitError(new Error("start() was ran while the notifier was already active"));
@@ -95,7 +94,6 @@ class PollingNotifier {
             }, this.checkInterval);
         })();
     }
-
     stop(): void {
         if (!this.isActive()) {
             this.emitError(new Error("stop() was ran while the notifier wasn't active"));
@@ -121,7 +119,6 @@ class PollingNotifier {
             this.subscriptions.push(channel);
         }
     }
-
     unsubscribe(channel: string): void;
     unsubscribe(channels: string[]): void;
     unsubscribe(channel_or_channels: string | string[]): void {
@@ -135,7 +132,6 @@ class PollingNotifier {
             this.subscriptions.splice(index, 1);
         }
     }
-
     getSubscriptions(): string[] {
         return [...this.subscriptions];
     }
