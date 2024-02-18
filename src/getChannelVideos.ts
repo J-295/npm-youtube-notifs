@@ -15,9 +15,9 @@ type Video = {
         created: Date;
     };
     thumb: {
+        url: string;
         width: number;
         height: number;
-        url: string;
     };
 }
 
@@ -41,16 +41,16 @@ async function getChannelVideos(channelId: string): Promise<Video[] | null> {
             description: String(entry["media:group"][0]["media:description"][0]),
             width: parseInt(String(entry["media:group"][0]["media:content"][0].$.width)),
             height: parseInt(String(entry["media:group"][0]["media:content"][0].$.height)),
-            thumb: {
-                width: parseInt(String(entry["media:group"][0]["media:thumbnail"][0].$.width)),
-                height: parseInt(String(entry["media:group"][0]["media:thumbnail"][0].$.height)),
-                url: String(entry["media:group"][0]["media:thumbnail"][0].$.url)
-            },
             channel: {
                 name: String(data.feed.title[0]),
                 url: String(data.feed.link[1].$.href),
                 id: channelId,
                 created: new Date(String(data.feed.published[0]))
+            },
+            thumb: {
+                url: String(entry["media:group"][0]["media:thumbnail"][0].$.url),
+                width: parseInt(String(entry["media:group"][0]["media:thumbnail"][0].$.width)),
+                height: parseInt(String(entry["media:group"][0]["media:thumbnail"][0].$.height)),
             }
         });
     }
