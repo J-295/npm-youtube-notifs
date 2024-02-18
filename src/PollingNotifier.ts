@@ -9,7 +9,7 @@ type PollingNotifierConfig = {
     storage: StorageInterface;
 }
 
-class PollingNotifier {
+export class PollingNotifier {
     private subscriptions: string[] = [];
     private checkInterval: number;
     private intervalId: NodeJS.Timeout | null = null;
@@ -161,5 +161,3 @@ class PollingNotifier {
         if (this.onNewVideos !== null) this.onNewVideos([vid]);
     }
 }
-
-export { PollingNotifier };

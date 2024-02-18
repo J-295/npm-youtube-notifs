@@ -1,6 +1,6 @@
 import { parseStringPromise as parseXml } from "xml2js";
 
-type Video = {
+export type Video = {
     title: string;
     url: string;
     id: string;
@@ -21,7 +21,7 @@ type Video = {
     };
 }
 
-async function getChannelVideos(channelId: string): Promise<Video[] | null> {
+export async function getChannelVideos(channelId: string): Promise<Video[] | null> {
     const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
         cache: "no-cache"
     });
@@ -54,8 +54,5 @@ async function getChannelVideos(channelId: string): Promise<Video[] | null> {
             }
         });
     }
-
     return videos;
 }
-
-export { getChannelVideos, Video };
