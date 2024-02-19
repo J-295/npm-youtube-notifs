@@ -26,7 +26,7 @@ export async function getChannelVideos(channelId: string): Promise<Video[] | nul
         cache: "no-cache"
     });
     if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`Request failed with HTTP status ${res.status}`);
+    if (res.status !== 200) throw new Error(`Recieved unexpected HTTP status: ${res.status}`);
     const xml = await res.text();
     const data = await parseXml(xml);
 

@@ -10,15 +10,15 @@ type PollingNotifierConfig = {
 }
 
 export class PollingNotifier {
-    private subscriptions: string[] = [];
-    private checkInterval: number;
-    private intervalId: NodeJS.Timeout | null = null;
+    private checkIntervalMs: number;
     private storage: StorageInterface;
+    private subscriptions: string[] = [];
+    private intervalId: NodeJS.Timeout | null = null;
     onError: ((error: Error) => void) | null = null;
     onNewVideos: ((videos: Video[]) => void) | null = null;
     constructor(config: PollingNotifierConfig) {
         if (config.interval <= 0) throw new Error("interval can't be zero or less");
-        this.checkInterval = config.interval * 60 * 1000;
+        this.checkIntervalMs = config.interval * 60 * 1000;
         this.storage = config.storage;
     }
 
@@ -61,9 +61,7 @@ export class PollingNotifier {
                     continue;
                 }
                 for (const video of channelVideos) {
-                    if (video.id === prevLatestVidId) {
-                        break;
-                    }
+                    if (video.id === prevLatestVidId) break;
                     newVids.push(video);
                 }
                 dataChanges[channelId] = channelVideos[0]!.id;
@@ -87,12 +85,12 @@ export class PollingNotifier {
             this.emitError(new Error("start() was ran while the notifier was already active"));
             return;
         }
-        (async () => {
-            await this.doChecks();
-            this.intervalId = setInterval(() => {
-                this.doChecks();
-            }, this.checkInterval);
-        })();
+        this.doChecks()
+            .then(() => {
+                this.intervalId = setInterval(() => {
+                    this.doChecks();
+                }, this.checkIntervalMs);
+            });
     }
     stop(): void {
         if (!this.isActive()) {
