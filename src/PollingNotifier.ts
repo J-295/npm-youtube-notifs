@@ -10,7 +10,8 @@ type PollingNotifierConfig = {
      * The object that will handle storage of data.
      * - `JsonStorage` can be used to retain data during downtime so uploads within that period aren't missed.
      * - If uploads during downtime don't matter, `MemoryStorage` can be used instead.
-     * - A custom `StorageInterface` extension can be created to store data between sessions in a different way, e.g., in a SQL database.
+     * - A custom `StorageInterface` extension can be created to store data
+     *  between sessions in a different way, e.g., in a SQL database.
      */
     storage: StorageInterface;
 }
@@ -118,7 +119,8 @@ export class PollingNotifier {
     }
 
     /**
-     * Subscribe to a channel ID or an array of channel IDs. The notifier will instead emit an error event for any ID which is already subscribed to or doesn't match the format of a channel ID.
+     * Subscribe to a channel ID or an array of channel IDs. The notifier will instead emit an error
+     *  event for any ID which is already subscribed to or doesn't match the format of a channel ID.
      */
     subscribe(channel: string): void;
     subscribe(channels: string[]): void;
@@ -136,7 +138,10 @@ export class PollingNotifier {
             this.subscriptions.push(channel);
         }
     }
-    /** Unsubscribe from a channel ID or an array of channel IDs. The notifier will instead emit an error event for any ID which isn't subscribed to. */
+    /**
+     * Unsubscribe from a channel ID or an array of channel IDs. The notifier will
+     *  instead emit an error event for any ID which isn't subscribed to.
+     */
     unsubscribe(channel: string): void;
     unsubscribe(channels: string[]): void;
     unsubscribe(channel_or_channels: string | string[]): void {
@@ -144,7 +149,8 @@ export class PollingNotifier {
         for (const channel of channels) {
             const index = this.subscriptions.indexOf(channel);
             if (index === -1) {
-                this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${JSON.stringify(channel)}`));
+                this.emitError(new Error("An attempt was made to unsubscribe from a" +
+                    `not-subscribed-to channel: ${JSON.stringify(channel)}`));
                 continue;
             }
             this.subscriptions.splice(index, 1);

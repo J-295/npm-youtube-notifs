@@ -36,6 +36,12 @@
         "sort-imports": "error",
         "eqeqeq": "error",
         "arrow-parens": "error",
+        "max-len": [
+            "error",
+            {
+                "code": 125
+            }
+        ],
         "@typescript-eslint/no-explicit-any": "off"
     },
     "ignorePatterns": [
