@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
+/** Names of stores. Store names will all be 1-16 lowercase letters and underscores */
 export enum Store {
     LatestVidIds = "latest_vid_ids"
 }
@@ -11,6 +12,7 @@ export abstract class StorageInterface {
     abstract del(store: Store, keys: string[]): Promise<void>;
 }
 
+/** Store data in memory. */
 export class MemoryStorage extends StorageInterface {
     protected data: Record<string, Record<string, string>> = {};
     async get(store: Store, keys: string[]) {
@@ -31,6 +33,7 @@ export class MemoryStorage extends StorageInterface {
     }
 }
 
+/** Store data in a JSON file which is saved upon any data change. */
 export class JsonStorage extends MemoryStorage {
     private filename: string;
     constructor(filename: string) {
