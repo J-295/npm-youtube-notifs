@@ -1,3 +1,6 @@
-export * from "./getChannelVideos";
-export * from "./PollingNotifier";
-export * from "./storage";
+export { Video } from "./getChannelVideos";
+export { PollingNotifier } from "./PollingNotifier";
+export {
+    JsonStorage, MemoryStorage,
+    StorageInterface, Store
+} from "./storage";

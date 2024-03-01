@@ -39,7 +39,7 @@ export class PollingNotifier {
     private emitError(error: unknown): void {
         // This should never happen
         if (!(error instanceof Error)) {
-            console.error("[youtube-notifs]: error is not an instance of Error");
+            console.error("[NPM youtube-notifs]: error is not an instance of Error");
             console.error(error);
             return;
         }
