@@ -29,7 +29,7 @@ export class PollingNotifier {
     onError: ((error: Error) => void) | null = null;
     /** Function for handling video uploads. All new videos detected are given in chronological order. */
     onNewVideos: ((videos: Video[]) => void) | null = null;
-    /** Will throw an error if interval is zero or less. */
+    /** Will throw an error if the provided interval is zero or less. */
     constructor(config: PollingNotifierConfig) {
         if (config.interval <= 0) throw new Error("interval can't be zero or less");
         this.checkIntervalMs = config.interval * 60 * 1000;
@@ -37,6 +37,7 @@ export class PollingNotifier {
     }
 
     private emitError(error: unknown): void {
+        // This should never happen
         if (!(error instanceof Error)) {
             console.error("[youtube-notifs]: error is not an instance of Error");
             console.error(error);
@@ -58,13 +59,13 @@ export class PollingNotifier {
                 const channelVideos = await getChannelVideos(channelId);
                 if (channelVideos === null) {
                     this.unsubscribe(channelId);
-                    throw new Error(`Unsubscribing from channel as it doesn't exist: "${channelId}"`);
+                    throw new Error(`Unsubscribed from channel as it doesn't exist: "${channelId}"`);
                 }
-                const prevLatestVidId = data[channelId]!;
                 if (channelVideos.length === 0) {
                     dataChanges[channelId] = "";
                     continue;
                 }
+                const prevLatestVidId = data[channelId]!;
                 if (prevLatestVidId === null) {
                     dataChanges[channelId] = channelVideos[0]!.id;
                     continue;
@@ -82,11 +83,11 @@ export class PollingNotifier {
             } catch (err) {
                 this.emitError(err);
             }
-
-            if (newVids.length === 0) continue;
-            newVids.sort((a, b) => a.created.getTime() - b.created.getTime());
-            if (this.onNewVideos !== null) this.onNewVideos(newVids);
         }
+        if (newVids.length === 0) return;
+        newVids.sort((a, b) => a.created.getTime() - b.created.getTime());
+        if (this.onNewVideos !== null) this.onNewVideos(newVids);
+
         if (Object.keys(dataChanges).length === 0) return;
         await this.storage.set(Store.LatestVidIds, dataChanges);
     }
@@ -149,8 +150,8 @@ export class PollingNotifier {
         for (const channel of channels) {
             const index = this.subscriptions.indexOf(channel);
             if (index === -1) {
-                this.emitError(new Error("An attempt was made to unsubscribe from a" +
-                    `not-subscribed-to channel: ${JSON.stringify(channel)}`));
+                this.emitError(new Error("unsubscribe() was ran with a channel ID" +
+                    ` that wasn't subscribed to: ${JSON.stringify(channel)}`));
                 continue;
             }
             this.subscriptions.splice(index, 1);

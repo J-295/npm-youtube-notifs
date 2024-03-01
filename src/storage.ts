@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-/** Names of stores. Store names will all be 1-16 lowercase letters and underscores */
+/** Names of stores. Store names are 1-16 lowercase letters and underscores. */
 export enum Store {
     LatestVidIds = "latest_vid_ids"
 }
@@ -28,7 +28,7 @@ export class MemoryStorage extends StorageInterface {
     }
     async del(store: Store, keys: string[]) {
         for (const key of keys) {
-            if (this.data[store]?.[key] !== undefined) delete this.data[store]![key];
+            delete this.data[store]?.[key];
         }
     }
 }

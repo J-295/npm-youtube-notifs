@@ -1,8 +1,7 @@
-# ALSO ADD ITEMS TO .gitignore
+# Files also need to be added to .gitignore
 
 /node_modules/
 /src/
-/.gitattributes
 /.eslintrc.json
 /package-lock.json
 /test.*

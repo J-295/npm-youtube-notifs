@@ -22,11 +22,12 @@ export type Video = {
 }
 
 export async function getChannelVideos(channelId: string): Promise<Video[] | null> {
-    const res = await fetch(`https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`, {
+    const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+    const res = await fetch(url, {
         cache: "no-cache"
     });
     if (res.status === 404) return null;
-    if (res.status !== 200) throw new Error(`Recieved unexpected HTTP status: ${res.status}`);
+    if (res.status !== 200) throw new Error(`Unexpected HTTP status ${res.status} from ${url}`);
     const xml = await res.text();
     const data = await parseXml(xml);
 
