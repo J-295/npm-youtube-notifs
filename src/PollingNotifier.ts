@@ -1,143 +1,168 @@
-import { KeyValPairs, StorageInterface, Store } from "./storage";
-import { Video, getChannelData } from "./getChannelData";
+import { StorageInterface, Store } from "./storage";
+import { Video, getChannelVideos } from "./getChannelVideos";
 
 const channelIdPattern = /^[0-9a-zA-Z_-]{24}$/;
 
 type PollingNotifierConfig = {
-    /** In minutes */
+    /** The number of minutes between checking for new videos. */
     interval: number;
+    /**
+     * The object that will handle storage of data.
+     * - `JsonStorage` can be used to retain data during downtime so uploads within that period aren't missed.
+     * - If uploads during downtime don't matter, `MemoryStorage` can be used instead.
+     * - A custom `StorageInterface` extension can be created to store data
+     *  between sessions in a different way, e.g., in a SQL database.
+     */
     storage: StorageInterface;
 }
 
-class PollingNotifier {
-    readonly subscriptions: string[] = [];
-    private checkInterval: number;
-    private intervalId: NodeJS.Timeout | null = null;
+/**
+ * Checks for new videos on an interval.
+ * - Will automatically unsubscribe from a channel ID and emit an error event if it doesn't exist.
+ */
+export class PollingNotifier {
+    private checkIntervalMs: number;
     private storage: StorageInterface;
-    // change `err` type to Error in next release (breaking change)
-    onError: ((err: any) => void) | null = null;
-    onNewVideos: ((vids: Video[]) => void) | null = null;
+    private subscriptions: string[] = [];
+    private intervalId: NodeJS.Timeout | null = null;
+    /** Function for handling errors. If `null`, errors will be logged instead. */
+    onError: ((error: Error) => void) | null = null;
+    /** Function for handling video uploads. All new videos detected are given in chronological order. */
+    onNewVideos: ((videos: Video[]) => void) | null = null;
+    /** Will throw an error if the provided interval is zero or less. */
     constructor(config: PollingNotifierConfig) {
-        if (config.interval <= 0) throw new Error("interval cannot be zero or less");
-        this.checkInterval = config.interval * 60 * 1000;
+        if (config.interval <= 0) throw new Error("interval can't be zero or less");
+        this.checkIntervalMs = config.interval * 60 * 1000;
         this.storage = config.storage;
     }
 
-    private emitError(err: unknown): void {
-        if (!(err instanceof Error)) {
-            console.error("[youtube-notifs]: ERROR IS NOT OF CORRECT TYPE");
-            console.error(err);
+    private emitError(error: unknown): void {
+        // This should never happen
+        if (!(error instanceof Error)) {
+            console.error("[NPM youtube-notifs]: error is not an instance of Error");
+            console.error(error);
             return;
         }
         if (this.onError === null) {
-            console.error(err);
+            console.error(error);
         } else {
-            this.onError(err);
+            this.onError(error);
         }
     }
 
     private async doChecks(): Promise<void> {
         const data = await this.storage.get(Store.LatestVidIds, this.subscriptions);
-        const dataChanges: KeyValPairs = {};
+        const dataChanges: Record<string, string> = {};
+        const newVids = [];
         for (const channelId of this.subscriptions) {
             try {
-                const channel = await getChannelData(channelId);
-                if (channel === null) {
+                const channelVideos = await getChannelVideos(channelId);
+                if (channelVideos === null) {
                     this.unsubscribe(channelId);
-                    throw new Error(`Unsubscribing from channel as not exists: "${channelId}"`);
+                    throw new Error(`Unsubscribed from channel as it doesn't exist: "${channelId}"`);
                 }
-                const prevLatestVidId = data[channel.id];
-                if (channel.videos.length === 0) {
-                    dataChanges[channel.id] = "";
+                if (channelVideos.length === 0) {
+                    dataChanges[channelId] = "";
                     continue;
                 }
+                const prevLatestVidId = data[channelId]!;
                 if (prevLatestVidId === null) {
-                    dataChanges[channel.id] = channel.videos[0].id;
+                    dataChanges[channelId] = channelVideos[0]!.id;
                     continue;
                 }
-                const vidIds = channel.videos.map((v) => v.id);
+                const vidIds = channelVideos.map((v) => v.id);
                 if (prevLatestVidId !== "" && !vidIds.includes(prevLatestVidId)) {
-                    dataChanges[channel.id] = channel.videos[0].id;
+                    dataChanges[channelId] = channelVideos[0]!.id;
                     continue;
                 }
-                const newVids = [];
-                for (const video of channel.videos) {
-                    if (video.id === prevLatestVidId) {
-                        break;
-                    }
+                for (const video of channelVideos) {
+                    if (video.id === prevLatestVidId) break;
                     newVids.push(video);
                 }
-                if (newVids.length === 0) {
-                    continue;
-                }
-                if (this.onNewVideos !== null) this.onNewVideos(newVids.reverse());
-                dataChanges[channel.id] = channel.videos[0].id;
+                dataChanges[channelId] = channelVideos[0]!.id;
             } catch (err) {
                 this.emitError(err);
             }
         }
+        if (newVids.length === 0) return;
+        newVids.sort((a, b) => a.created.getTime() - b.created.getTime());
+        if (this.onNewVideos !== null) this.onNewVideos(newVids);
+
         if (Object.keys(dataChanges).length === 0) return;
         await this.storage.set(Store.LatestVidIds, dataChanges);
     }
 
+    /** Returns whether the notifier is currently listening for new videos on the interval. */
     isActive(): boolean {
         return this.intervalId !== null;
     }
-
+    /** Start listening for new videos. The notifier will instead emit an error event if it is already active. */
     start(): void {
         if (this.isActive()) {
-            this.emitError(new Error("start() was ran while the notifier was active."));
+            this.emitError(new Error("start() was ran while the notifier was already active"));
             return;
         }
-        (async () => {
-            await this.doChecks();
-            this.intervalId = setInterval(() => {
-                this.doChecks();
-            }, this.checkInterval);
-        })();
+        this.doChecks()
+            .then(() => {
+                this.intervalId = setInterval(() => {
+                    this.doChecks();
+                }, this.checkIntervalMs);
+            });
     }
-
+    /** Stop listening for new videos. The notifier will instead emit an error event if it isn't active. */
     stop(): void {
         if (!this.isActive()) {
-            this.emitError(new Error("stop() was ran while the notifier was not active."));
+            this.emitError(new Error("stop() was ran while the notifier wasn't active"));
             return;
         }
-        if (this.intervalId === null) return;
-        clearInterval(this.intervalId);
+        clearInterval(this.intervalId!);
         this.intervalId = null;
     }
 
+    /**
+     * Subscribe to a channel ID or an array of channel IDs. The notifier will instead emit an error
+     *  event for any ID which is already subscribed to or doesn't match the format of a channel ID.
+     */
     subscribe(channel: string): void;
     subscribe(channels: string[]): void;
-    subscribe(channel_or_channels: string[] | string): void {
+    subscribe(channel_or_channels: string | string[]): void {
         const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             if (!channelIdPattern.test(channel)) {
-                this.emitError(new Error(`Invalid channel ID inputted: ${JSON.stringify(channel)}`));
-                return;
+                this.emitError(new Error(`subscribe() was ran with an invalid channel ID: ${JSON.stringify(channel)}`));
+                continue;
             }
             if (this.subscriptions.includes(channel)) {
-                this.emitError(new Error(`An attempt was made to subscribe to an already subscribed-to channel: ${channel}`));
-                return;
+                this.emitError(new Error(`subscribe() was ran with a channel ID that is already subscribed to: ${channel}`));
+                continue;
             }
             this.subscriptions.push(channel);
         }
     }
-
+    /**
+     * Unsubscribe from a channel ID or an array of channel IDs. The notifier will
+     *  instead emit an error event for any ID which isn't subscribed to.
+     */
     unsubscribe(channel: string): void;
     unsubscribe(channels: string[]): void;
-    unsubscribe(channel_or_channels: string[] | string): void {
+    unsubscribe(channel_or_channels: string | string[]): void {
         const channels = (typeof channel_or_channels === "string") ? [channel_or_channels] : channel_or_channels;
         for (const channel of channels) {
             const index = this.subscriptions.indexOf(channel);
             if (index === -1) {
-                this.emitError(new Error(`An attempt was made to unsubscribe from a not-subscribed-to channel: ${JSON.stringify(channel)}`));
-                return;
+                this.emitError(new Error("unsubscribe() was ran with a channel ID" +
+                    ` that wasn't subscribed to: ${JSON.stringify(channel)}`));
+                continue;
             }
             this.subscriptions.splice(index, 1);
         }
     }
+    /** Get a copy of the subscriptions list. */
+    getSubscriptions(): string[] {
+        return [...this.subscriptions];
+    }
 
+    /** Makes the notifier emit a fake video allowing you to test your code. */
     simulateNewVideo(properties?: Partial<Video>): void {
         const vid: Video = {
             title: "Video Title",
@@ -153,7 +178,7 @@ class PollingNotifier {
                 url: "https://iX.ytimg.com/vi/XxXxXxXxXxX/hqdefault.jpg"
             },
             channel: {
-                name: "Channel Title",
+                name: "Channel Name",
                 url: "https://www.youtube.com/channel/XXXXXXXXXXXXXXXXXXXXXXXX",
                 id: "XXXXXXXXXXXXXXXXXXXXXXXX",
                 created: new Date()
@@ -163,5 +188,3 @@ class PollingNotifier {
         if (this.onNewVideos !== null) this.onNewVideos([vid]);
     }
 }
-
-export { PollingNotifier };

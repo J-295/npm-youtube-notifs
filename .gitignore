@@ -1,5 +1,6 @@
-# ALSO ADD ITEMS TO .npmignore
+# Files also need to be added to .npmignore
 
+/dist/
 /node_modules/
 /package-lock.json
 /test.*
