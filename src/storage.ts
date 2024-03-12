@@ -46,9 +46,6 @@ export class JsonStorage extends MemoryStorage {
             fs.writeFileSync(filename, "{}");
         }
     }
-    get(...args: Parameters<StorageInterface["get"]>) {
-        return super.get(...args);
-    }
     async set(...args: Parameters<StorageInterface["set"]>) {
         await super.set(...args);
         fs.writeFileSync(this.filename, JSON.stringify(this.data));
