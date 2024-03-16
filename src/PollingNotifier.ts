@@ -84,9 +84,10 @@ export class PollingNotifier {
                 this.emitError(err);
             }
         }
-        if (newVids.length === 0) return;
-        newVids.sort((a, b) => a.created.getTime() - b.created.getTime());
-        if (this.onNewVideos !== null) this.onNewVideos(newVids);
+        if (newVids.length !== 0) {
+            newVids.sort((a, b) => a.created.getTime() - b.created.getTime());
+            if (this.onNewVideos !== null) this.onNewVideos(newVids);
+        }
 
         if (Object.keys(dataChanges).length === 0) return;
         await this.storage.set(Store.LatestVidIds, dataChanges);
