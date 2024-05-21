@@ -9,7 +9,7 @@
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/James-Bennett-295/npm-youtube-notifs.git"
+		"url": "git+https://github.com/J-295/npm-youtube-notifs.git"
 	},
 	"keywords": [
 		"youtube",
@@ -24,9 +24,9 @@
 	"author": "James Bennett",
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/James-Bennett-295/npm-youtube-notifs/issues"
+		"url": "https://github.com/J-295/npm-youtube-notifs/issues"
 	},
-	"homepage": "https://github.com/James-Bennett-295/npm-youtube-notifs/wiki",
+	"homepage": "https://github.com/J-295/npm-youtube-notifs/wiki",
 	"dependencies": {
 		"xml2js": "^0.6.2"
 	},
