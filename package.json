@@ -1,6 +1,6 @@
 {
 	"name": "youtube-notifs",
-	"version": "7.0.1",
+	"version": "7.0.2",
 	"description": "Receive events from YouTube video uploads!",
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
