@@ -1,8 +1,8 @@
 {
     "compilerOptions": {
         "target": "ESNext",
-        "module": "commonjs",
-        "moduleResolution": "node",
+        "module": "CommonJS",
+        "moduleResolution": "Node",
         "outDir": "dist/",
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
