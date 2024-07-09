@@ -11,8 +11,5 @@
 		"declaration": true,
 		"noUnusedLocals": true,
 		"noUncheckedIndexedAccess": true
-	},
-	"include": [
-		"src/**/*"
-	]
+	}
 }
