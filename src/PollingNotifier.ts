@@ -29,9 +29,9 @@ export class PollingNotifier {
     onError: ((error: Error) => void) | null = null;
     /** Function for handling video uploads. All new videos detected are given in chronological order. */
     onNewVideos: ((videos: Video[]) => void) | null = null;
-    /** Will throw an error if the provided interval is zero or less. */
+    /** Will throw an error if the provided interval is zero or negative. */
     constructor(config: PollingNotifierConfig) {
-        if (config.interval <= 0) throw new Error("interval can't be zero or less");
+        if (config.interval <= 0) throw new Error("interval can't be zero or negative");
         this.checkIntervalMs = config.interval * 60 * 1000;
         this.storage = config.storage;
     }
